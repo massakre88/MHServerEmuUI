@@ -1,4 +1,5 @@
 # MHServerEmuUI
+IDE used is QT Creator
 
 A GUI for MHServerEmu. The goal is to have the many aspects of server operation in one easy to use visual tool.
 
