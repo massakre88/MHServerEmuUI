@@ -1,5 +1,5 @@
 #include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "ui_mainwindow.h"
 #include <QFileDialog>
 #include <QDir>
 #include <QSettings>
@@ -15,6 +15,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QTimer>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -22,16 +23,35 @@ MainWindow::MainWindow(QWidget *parent)
     , apacheProcess(new QProcess(this))
     , serverProcess(new QProcess(this))
     , playerCount(0)
+    , statusCheckTimer(new QTimer(this)) // Initialize the timer in the initializer list
+
 {
     ui->setupUi(this);
 
-    this->setStyleSheet(
-        "QLineEdit { background: white; border: 1px solid gray; }"
-        "QLabel { background: transparent; color: black; }"
-        );
+    // Load status indicator images
+    onPixmap = QPixmap(":/images/on");
+    offPixmap = QPixmap(":/images/off");
+    if (onPixmap.isNull()) {
+        qDebug() << "Failed to load /images/on from resource file.";
+    }
+    if (offPixmap.isNull()) {
+        qDebug() << "Failed to load /images/off from resource file.";
+    }
 
-    // Set background image for the main window
-    this->setStyleSheet("QMainWindow { background-image: url(:/images/background.jpg); background-repeat: no-repeat; background-position: center; }");
+    // Set initial status indicators
+    ui->mhServerStatusLabel->setPixmap(offPixmap);
+    ui->apacheServerStatusLabel->setPixmap(offPixmap);
+
+    // Connect the timer to the update function
+    connect(statusCheckTimer, &QTimer::timeout, this, &MainWindow::updateServerStatus);
+
+    // Start the timer to check status every 1 second
+    statusCheckTimer->start(1000);
+
+    this->setStyleSheet(
+    "QLineEdit { background: white; border: 1px solid gray; }"
+    "QLabel { background: transparent; color: black; }"
+    );
 
     // Add this code to link liveTuningLayout
     liveTuningLayout = qobject_cast<QVBoxLayout *>(ui->liveTuningContainer->layout());
@@ -70,6 +90,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonBan, &QPushButton::clicked, this, &MainWindow::onPushButtonBanClicked);
     connect(ui->pushButtonUnBan, &QPushButton::clicked, this, &MainWindow::onPushButtonUnBanClicked);
     connect(ui->KickButton, &QPushButton::clicked, this, &MainWindow::onKickButtonClicked);
+
 }
 
 MainWindow::~MainWindow() {
@@ -942,4 +963,21 @@ void MainWindow::onKickButtonClicked() {
     QString command = QString("!client kick %1\n").arg(playerName);
     serverProcess->write(command.toUtf8());
     ui->ServerOutputEdit->append(QString("Sent command: %1").arg(command)); // Optional feedback
+}
+
+void MainWindow::updateServerStatus() {
+    // Check MHServerEmu.exe status
+    QProcess process;
+    process.start("tasklist", {"/fi", "imagename eq MHServerEmu.exe", "/nh"});
+    process.waitForFinished();
+    QString output = process.readAllStandardOutput().trimmed();
+    bool isMHServerRunning = output.contains("MHServerEmu.exe");
+    ui->mhServerStatusLabel->setPixmap(isMHServerRunning ? onPixmap : offPixmap);
+
+    // Check httpd.exe status
+    process.start("tasklist", {"/fi", "imagename eq httpd.exe", "/nh"});
+    process.waitForFinished();
+    output = process.readAllStandardOutput().trimmed();
+    bool isApacheRunning = output.contains("httpd.exe");
+    ui->apacheServerStatusLabel->setPixmap(isApacheRunning ? onPixmap : offPixmap);
 }
