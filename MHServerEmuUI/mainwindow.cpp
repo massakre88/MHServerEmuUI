@@ -194,8 +194,8 @@ void MainWindow::stopServer() {
     connect(serverProcess, &QProcess::errorOccurred, this, &MainWindow::handleServerError);
 
     // Fallback: Ensure both processes are killed using taskkill
-    QProcess::execute("taskkill /f /im MHServerEmu.exe");
-    QProcess::execute("taskkill /f /im httpd.exe");
+    QProcess::execute("taskkill", QStringList() << "/F"<<"/IM"<<"MHServerEmu.exe");
+    QProcess::execute("taskkill", QStringList() << "/F"<<"/IM"<<"httpd.exe");
 
     ui->ServerOutputEdit->append("Server stopped.");
     playerCount = 0; // Reset player count
@@ -492,7 +492,6 @@ void MainWindow::displayCategoryItems(const QString &category)
     liveTuningLayout->invalidate();
 }
 
-
 void MainWindow::clearLayout(QLayout *layout)
 {
     while (QLayoutItem *child = layout->takeAt(0)) {
@@ -547,10 +546,19 @@ void MainWindow::createLiveTuningSliders(const QJsonArray &data) {
 
 void MainWindow::onSaveLiveTuning()
 {
+    // Construct the file path from mhServerPathEdit
+    QString basePath = ui->mhServerPathEdit->text(); // Retrieve the text from the line edit
+    if (basePath.isEmpty()) {
+        QMessageBox::critical(this, "Error", "Server path is not set. Please specify the server directory.");
+        return;
+    }
+    liveTuningFilePath = QDir(basePath).filePath("MHServerEmu/Data/Game/LiveTuningData.json");
+
     QJsonArray updatedData;
 
-    for (int i = 0; i < ui->liveTuningLayout->count(); ++i) {
-        QLayoutItem *layoutItem = ui->liveTuningLayout->itemAt(i);
+    // Iterate over all items in the liveTuningLayout
+    for (int i = 0; i < liveTuningLayout->count(); ++i) { // Correct loop range
+        QLayoutItem *layoutItem = liveTuningLayout->itemAt(i); // Corrected layout reference
         QHBoxLayout *rowLayout = qobject_cast<QHBoxLayout *>(layoutItem->layout());
         if (!rowLayout) continue;
 
