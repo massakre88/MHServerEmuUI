@@ -60,6 +60,11 @@ private:
     void populateComboBox();
     void displayCategoryItems(const QString &category);
     void clearLayout(QLayout *layout);
+    QPixmap onPixmap;  // Image for the "on" state
+    QPixmap offPixmap; // Image for the "off" state
+    QTimer *statusCheckTimer; // Timer to periodically check status
+
+    void updateServerStatus();
 };
 
 #endif // MAINWINDOW_H

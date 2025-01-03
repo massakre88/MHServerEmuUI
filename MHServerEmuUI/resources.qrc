@@ -3,5 +3,7 @@
         <file alias="LunarNewYear">LunarNewYear.jpg</file>
         <file alias="icon">icon.ico</file>
         <file alias="Background">background.jpg</file>
+        <file alias="on">on.png</file>
+        <file alias="off">off.png</file>
     </qresource>
 </RCC>
