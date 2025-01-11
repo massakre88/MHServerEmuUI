@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
-
+#define APACHE_BIN "/Apache24/bin"
+#define SERVER_EMU_DIR "/MHServerEmu"
+#define LIVETUNING_DATA "/Data/Game/LiveTuningData.json"
 #include <QMainWindow>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -46,6 +48,8 @@ private slots:
     void onPushButtonBanClicked();
     void onPushButtonUnBanClicked();
     void onKickButtonClicked();
+    void onServerPathEditUpdated();
+    void onPushButtonSendToServerClicked();
 
 private:
     Ui::MainWindow *ui;
@@ -63,8 +67,7 @@ private:
     QPixmap onPixmap;  // Image for the "on" state
     QPixmap offPixmap; // Image for the "off" state
     QTimer *statusCheckTimer; // Timer to periodically check status
-
-    void updateServerStatus();
+    void updateServerStatus();    
 };
 
 #endif // MAINWINDOW_H

@@ -49,19 +49,17 @@ MainWindow::MainWindow(QWidget *parent)
     statusCheckTimer->start(1000);
 
     this->setStyleSheet(
+    "QCombBox { background: white; border: 1px solid gray; }"
     "QLineEdit { background: white; border: 1px solid gray; }"
     "QLabel { background: transparent; color: black; }"
     );
 
-    // Add this code to link liveTuningLayout
+    // Link liveTuningLayout
     liveTuningLayout = qobject_cast<QVBoxLayout *>(ui->liveTuningContainer->layout());
     if (!liveTuningLayout) {
         qDebug() << "Error: liveTuningContainer does not have a QVBoxLayout.";
         return;
     }
-
-    // Link liveTuningLayout to the container in the UI
-    //liveTuningLayout = ui->liveTuningContainer->layout();
 
     // Other initializations
     QSettings settings("PTM", "MHServerEmuUI");
@@ -90,7 +88,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->pushButtonBan, &QPushButton::clicked, this, &MainWindow::onPushButtonBanClicked);
     connect(ui->pushButtonUnBan, &QPushButton::clicked, this, &MainWindow::onPushButtonUnBanClicked);
     connect(ui->KickButton, &QPushButton::clicked, this, &MainWindow::onKickButtonClicked);
-
+    connect(ui->mhServerPathEdit, &QLineEdit::editingFinished, this, &MainWindow::onServerPathEditUpdated);
+    connect(ui->pushButtonSendToServer, &QPushButton::clicked, this, &MainWindow::onPushButtonSendToServerClicked);
 }
 
 MainWindow::~MainWindow() {
@@ -124,6 +123,7 @@ void MainWindow::onBrowseButtonClicked() {
 
 void MainWindow::startServer() {
     QString serverPath = ui->mhServerPathEdit->text();
+
     if (serverPath.isEmpty()) {
         QMessageBox::critical(this, "Error", "Please specify the server directory.");
         return;
@@ -133,13 +133,18 @@ void MainWindow::startServer() {
     QString mhServerPath = serverPath + "/MHServerEmu/MHServerEmu.exe";
     QString apacheRoot = serverPath + "/Apache24";
 
+    // Ensure no existing instances of the server or Apache are running
+    QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "httpd.exe");
+    QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "MHServerEmu.exe");
+
     // Check if executables exist
     if (!QFile::exists(apachePath)) {
-        QMessageBox::critical(this, "Error", "Apache executable (httpd.exe) not found in the specified directory.");
+        QMessageBox::critical(this, "Error", QString("Apache executable (httpd.exe) not found at %1").arg(apachePath));
         return;
     }
+
     if (!QFile::exists(mhServerPath)) {
-        QMessageBox::critical(this, "Error", "MHServerEmu executable not found in the specified directory.");
+        QMessageBox::critical(this, "Error", QString("MHServerEmu executable not found at %1").arg(mhServerPath));
         return;
     }
 
@@ -161,10 +166,11 @@ void MainWindow::startServer() {
     serverProcess->start(mhServerPath);
     if (!serverProcess->waitForStarted()) {
         QMessageBox::critical(this, "Error", "Failed to start MHServerEmu.");
-        apacheProcess->kill(); // Stop Apache if server fails
+        apacheProcess->kill(); // Stop Apache if MHServerEmu fails to start
         return;
     }
 
+    // Log the successful server start
     ui->ServerOutputEdit->append("Server started successfully.");
 }
 
@@ -194,8 +200,8 @@ void MainWindow::stopServer() {
     connect(serverProcess, &QProcess::errorOccurred, this, &MainWindow::handleServerError);
 
     // Fallback: Ensure both processes are killed using taskkill
-    QProcess::execute("taskkill", QStringList() << "/F"<<"/IM"<<"MHServerEmu.exe");
-    QProcess::execute("taskkill", QStringList() << "/F"<<"/IM"<<"httpd.exe");
+    QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "MHServerEmu.exe");
+    QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "httpd.exe");
 
     ui->ServerOutputEdit->append("Server stopped.");
     playerCount = 0; // Reset player count
@@ -203,12 +209,72 @@ void MainWindow::stopServer() {
 }
 
 void MainWindow::onPushButtonShutdownClicked() {
-    if (serverProcess->state() == QProcess::Running) {
-        serverProcess->write("!server shutdown\n");
-        ui->ServerOutputEdit->append("Sent server shutdown command.");
-    } else {
+    // Ensure the server is running
+    if (serverProcess->state() != QProcess::Running) {
         QMessageBox::warning(this, "Error", "Server is not running.");
+        return;
     }
+
+    // Get the shutdown time from lineEditShutdownTime
+    bool ok;
+    int shutdownTime = ui->lineEditShutdownTime->text().toInt(&ok);
+    if (!ok || shutdownTime <= 0) {
+        QMessageBox::warning(this, "Error", "Invalid shutdown time specified.");
+        return;
+    }
+
+    // Get the shutdown message from lineEditShutdownMessage
+    QString shutdownMessage = ui->lineEditShutdownMessage->text();
+    shutdownMessage = shutdownMessage.replace("SHUTDOWNTIMER", QString::number(shutdownTime));
+
+    // Broadcast the initial shutdown message
+    QString broadcastCommand = QString("!server broadcast %1\n").arg(shutdownMessage);
+    serverProcess->write(broadcastCommand.toUtf8());
+    ui->ServerOutputEdit->append("Sent broadcast message: " + shutdownMessage);
+
+    // Update the playerShutdownCount label with the initial time
+    ui->playerShutdownCount->setText(QString("%1").arg(shutdownTime));
+
+    // Start the countdown timer
+    QTimer *shutdownTimer = new QTimer(this);
+
+    // Convert shutdown time to seconds
+    int totalSeconds = shutdownTime * 60;
+
+    connect(shutdownTimer, &QTimer::timeout, this, [=]() mutable {
+        // Decrement totalSeconds each second
+        totalSeconds--;
+
+        // Calculate remaining minutes and seconds
+        int minutesRemaining = totalSeconds / 60;
+
+        // Update the label with the remaining time
+        if (totalSeconds > 0) {
+            ui->playerShutdownCount->setText(QString("%1").arg(minutesRemaining));
+        }
+
+        if (totalSeconds == 60) {
+            // Send the "one minute left" message
+            QString oneMinuteMessage = "One minute left until server shutdown. Log out now to save your data!";
+            QString oneMinuteCommand = QString("!server broadcast %1\n").arg(oneMinuteMessage);
+            serverProcess->write(oneMinuteCommand.toUtf8());
+            ui->ServerOutputEdit->append("Sent broadcast message: " + oneMinuteMessage);
+        }
+
+        if (totalSeconds <= 0) {
+            // Send the shutdown command and stop the timer
+            serverProcess->write("!server shutdown\n");
+            ui->ServerOutputEdit->append("Sent server shutdown command.");
+            ui->playerShutdownCount->setText("Server shutdown in progress...");
+            shutdownTimer->stop();
+            shutdownTimer->deleteLater(); // Clean up the timer
+        }
+    });
+
+    // Start the timer with 1-second intervals
+    shutdownTimer->start(1000);
+
+    ui->ServerOutputEdit->append(QString("Shutdown countdown started. Server will shut down in %1 minutes.").arg(shutdownTime));
 }
 
 void MainWindow::readServerOutput() {
@@ -235,6 +301,12 @@ void MainWindow::readServerOutput() {
         if (playerCount < 0) playerCount = 0; // Ensure count doesn't go negative
     }
 
+    if (outputText.contains("[ServerManager] Shutdown finished")) {
+        QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "MHServerEmu.exe");
+        playerCount = 0; // Reset player count
+        updatePlayerCountLabel();
+    }
+
     // Update the player count label
     updatePlayerCountLabel();
 }
@@ -258,19 +330,82 @@ void MainWindow::onStartClientButtonClicked() {
 }
 
 void MainWindow::onUpdateButtonClicked() {
-    // Get the current date in YYYYMMDD format
-    QString currentDate = QDate::currentDate().toString("yyyyMMdd");
+    // Check if MHServerEmu.exe or httpd.exe is running
+    QStringList processesToCheck = {"MHServerEmu.exe", "httpd.exe"};
+    QStringList runningProcesses;
 
-    // Construct the download URL with the current date
+    for (const QString &process : processesToCheck) {
+        QProcess checkProcess;
+        checkProcess.start("tasklist", {"/FI", QString("IMAGENAME eq %1").arg(process)});
+        checkProcess.waitForFinished();
+
+        QString output = checkProcess.readAllStandardOutput();
+        if (output.contains(process, Qt::CaseInsensitive)) {
+            runningProcesses.append(process);
+        }
+    }
+
+    // If any processes are running, notify the user and stop the update
+    if (!runningProcesses.isEmpty()) {
+        QString message = "The following server processes are running:\n";
+        message += runningProcesses.join("\n");
+        message += "\n\nPlease stop the server before updating.";
+        QMessageBox::warning(this, "Server Running", message);
+        return;
+    }
+
+    // Define the nightly build time in GMT+0
+    QTime nightlyBuildTime(7, 15, 0); // 7:15 AM GMT+0
+
+    // Get the current UTC time
+    QDateTime nowUTC = QDateTime::currentDateTimeUtc();
+
+    // Calculate the correct date for the nightly build
+    QDate nightlyDate = nowUTC.date();
+    if (nowUTC.time() < nightlyBuildTime) {
+        nightlyDate = nightlyDate.addDays(-1); // Use the previous day's date if before build time
+    }
+
+    // Get the nightly date in YYYYMMDD format
+    QString currentDate = nightlyDate.toString("yyyyMMdd");
+
+    // Construct the download URL with the correct nightly date
     QString downloadUrl = QString("https://nightly.link/Crypto137/MHServerEmu/workflows/nightly-release-windows-x64/master/MHServerEmu-nightly-%1-Release-windows-x64.zip").arg(currentDate);
 
-    // Get the directory where the zip file should be saved
+    // Get the server path for saving the file
     QString serverPath = ui->mhServerPathEdit->text();
     if (serverPath.isEmpty()) {
         QMessageBox::warning(this, "Error", "Server path is empty. Set the path first.");
         return;
     }
+
     QString zipFilePath = serverPath + "/MHServerEmu-nightly.zip";
+    QString extractPath = serverPath + "/MHServerEmu";
+
+    // Prepare backup for files to preserve
+    QStringList filesToBackup;
+    if (ui->checkBoxUpdateConfigFile->isChecked()) {
+        filesToBackup.append("config.ini");
+    }
+    if (ui->checkBoxUpdateSaveLiveTuning->isChecked()) {
+        filesToBackup.append("Data/Game/LiveTuningData.json");
+    }
+
+    QMap<QString, QString> backupFiles; // Map original file paths to backup paths
+    for (const QString &file : filesToBackup) {
+        QString originalPath = extractPath + "/" + file;
+        QString backupPath = originalPath + ".bak";
+        if (QFile::exists(originalPath)) {
+            if (QFile::rename(originalPath, backupPath)) {
+                backupFiles.insert(originalPath, backupPath);
+                qDebug() << "Backed up file:" << originalPath << "to" << backupPath;
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to back up file: " + originalPath);
+                qDebug() << "Failed to back up file:" << originalPath;
+                return;
+            }
+        }
+    }
 
     // Start downloading the file
     QNetworkAccessManager *manager = new QNetworkAccessManager(this);
@@ -285,6 +420,7 @@ void MainWindow::onUpdateButtonClicked() {
         QByteArray fileData = reply->readAll();
         if (fileData.isEmpty()) {
             QMessageBox::critical(this, "Error", "Downloaded file is empty.");
+            qDebug() << "Downloaded file is empty.";
             reply->deleteLater();
             return;
         }
@@ -293,45 +429,75 @@ void MainWindow::onUpdateButtonClicked() {
         if (file.open(QIODevice::WriteOnly)) {
             file.write(fileData);
             file.close();
+            qDebug() << "Downloaded file saved to:" << zipFilePath;
         } else {
-            QMessageBox::critical(this, "Error", "Failed to save downloaded file.");
+            QMessageBox::critical(this, "Error", "Failed to save downloaded file: " + file.errorString());
+            qDebug() << "Failed to save file:" << zipFilePath << "Error:" << file.errorString();
             reply->deleteLater();
             return;
         }
 
-        // Extract the zip file
-        QString extractPath = serverPath + "/MHServerEmu";
+        // Ensure the ZIP file exists
+        if (!QFile::exists(zipFilePath)) {
+            QMessageBox::critical(this, "Error", "The ZIP file does not exist after saving.");
+            qDebug() << "ZIP file does not exist at:" << zipFilePath;
+            reply->deleteLater();
+            return;
+        }
+
+        // Ensure the extraction path exists
         QDir dir(extractPath);
-        if (!dir.exists()) {
-            dir.mkpath(".");
+        if (!dir.exists() && !dir.mkpath(".")) {
+            QMessageBox::critical(this, "Error", "Failed to create extraction directory: " + extractPath);
+            qDebug() << "Failed to create directory:" << extractPath;
+            reply->deleteLater();
+            return;
         }
 
-        // Conditional flags for extraction
-        QString excludeFlags;
-        if (ui->checkBoxUpdateConfigFile->isChecked()) {
-            excludeFlags += QString(" -Exclude 'config.ini'");
-        }
-        if (ui->checkBoxUpdateSaveLiveTuning->isChecked()) {
-            excludeFlags += QString(" -Exclude 'Data/Game/LiveTuningData.json'");
-        }
-
-        // PowerShell command
-        QString powerShellCommand = QString("powershell -Command \"Expand-Archive -Path '%1' -DestinationPath '%2'%3\"")
-                                        .arg(zipFilePath)
-                                        .arg(extractPath)
-                                        .arg(excludeFlags);
+        // Directly run PowerShell with QProcess
+        QStringList args = {
+            "-NoProfile",
+            "-ExecutionPolicy", "Bypass",
+            "-Command",
+            QString("Expand-Archive -Path '%1' -DestinationPath '%2' -Force").arg(zipFilePath, extractPath)
+        };
 
         QProcess *process = new QProcess(this);
+        process->setProgram("powershell");
+        process->setArguments(args);
+        connect(process, &QProcess::readyReadStandardOutput, this, [=]() {
+            qDebug() << "PowerShell Output:" << process->readAllStandardOutput();
+        });
+        connect(process, &QProcess::readyReadStandardError, this, [=]() {
+            qDebug() << "PowerShell Error:" << process->readAllStandardError();
+        });
         connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
             if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
-                QFile::remove(zipFilePath); // Clean up zip file
+                // Restore backup files
+                for (auto it = backupFiles.begin(); it != backupFiles.end(); ++it) {
+                    QString originalPath = it.key();
+                    QString backupPath = it.value();
+                    if (QFile::exists(originalPath)) {
+                        QFile::remove(originalPath); // Delete new file
+                    }
+                    if (QFile::rename(backupPath, originalPath)) {
+                        qDebug() << "Restored file:" << backupPath << "to" << originalPath;
+                    } else {
+                        QMessageBox::critical(this, "Error", "Failed to restore file: " + backupPath);
+                        qDebug() << "Failed to restore file:" << backupPath;
+                    }
+                }
+
+                QFile::remove(zipFilePath); // Clean up the ZIP file after successful extraction
                 QMessageBox::information(this, "Update", "Update completed successfully.");
+                qDebug() << "Extraction completed successfully. ZIP file deleted.";
             } else {
-                QMessageBox::critical(this, "Error", "Failed to extract update files.");
+                QMessageBox::critical(this, "Error", QString("Failed to extract update files. Exit Code: %1").arg(exitCode));
+                qDebug() << "PowerShell failed with Exit Code:" << exitCode;
             }
         });
 
-        process->start("cmd.exe", {"/C", powerShellCommand});
+        process->start();
         reply->deleteLater();
     });
 
@@ -544,47 +710,66 @@ void MainWindow::createLiveTuningSliders(const QJsonArray &data) {
     }
 }
 
-void MainWindow::onSaveLiveTuning()
-{
-    // Construct the file path from mhServerPathEdit
-    QString basePath = ui->mhServerPathEdit->text(); // Retrieve the text from the line edit
-    if (basePath.isEmpty()) {
-        QMessageBox::critical(this, "Error", "Server path is not set. Please specify the server directory.");
-        return;
+void MainWindow::onSaveLiveTuning() {
+    // Ensure liveTuningFilePath is set
+    if (liveTuningFilePath.isEmpty()) {
+        liveTuningFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
     }
-    liveTuningFilePath = QDir(basePath).filePath("MHServerEmu/Data/Game/LiveTuningData.json");
 
-    QJsonArray updatedData;
+    // Prepare JSON array to store the settings
+    QJsonArray savedArray;
 
-    // Iterate over all items in the liveTuningLayout
-    for (int i = 0; i < liveTuningLayout->count(); ++i) { // Correct loop range
-        QLayoutItem *layoutItem = liveTuningLayout->itemAt(i); // Corrected layout reference
-        QHBoxLayout *rowLayout = qobject_cast<QHBoxLayout *>(layoutItem->layout());
-        if (!rowLayout) continue;
+    // Iterate through all categories in the map
+    for (auto it = categories.constBegin(); it != categories.constEnd(); ++it) {
+        const QJsonArray &items = it.value();
 
-        QLabel *label = qobject_cast<QLabel *>(rowLayout->itemAt(0)->widget());
-        QLineEdit *lineEdit = qobject_cast<QLineEdit *>(rowLayout->itemAt(2)->widget());
+        for (const QJsonValue &value : items) {
+            QJsonObject obj = value.toObject();
 
-        if (label && lineEdit) {
-            QJsonObject obj;
-            obj["Setting"] = label->text();
-            obj["Value"] = lineEdit->text().toDouble();
-            updatedData.append(obj);
+            // Retrieve values
+            QString setting = obj["Setting"].toString();
+            QString prototype = obj["Prototype"].toString();
+            double currentValue = obj["Value"].toDouble();
+
+            // Check if the setting exists in the UI and get its updated value
+            double updatedValue = currentValue; // Default to original value
+            for (int i = 0; i < liveTuningLayout->count() - 1; ++i) {
+                QHBoxLayout *rowLayout = qobject_cast<QHBoxLayout *>(liveTuningLayout->itemAt(i)->layout());
+                if (!rowLayout) continue;
+
+                QLabel *label = qobject_cast<QLabel *>(rowLayout->itemAt(0)->widget());
+                QLineEdit *lineEdit = qobject_cast<QLineEdit *>(rowLayout->itemAt(2)->widget());
+
+                if (label && lineEdit && label->text() == setting) {
+                    updatedValue = lineEdit->text().toDouble(); // Get updated value from UI
+                    break;
+                }
+            }
+
+            // Construct updated JSON object
+            QJsonObject updatedObj;
+            updatedObj["Setting"] = setting;
+            updatedObj["Prototype"] = prototype;
+            updatedObj["Value"] = updatedValue;
+
+            // Append the updated object to the JSON array
+            savedArray.append(updatedObj);
         }
     }
 
-    // Write updated data to file
+    // Save the JSON array to the file
     QFile file(liveTuningFilePath);
     if (!file.open(QIODevice::WriteOnly)) {
-        QMessageBox::critical(this, "Error", "Unable to save LiveTuningData.json");
+        QMessageBox::critical(this, "Error", QString("Failed to save Live Tuning data to %1").arg(liveTuningFilePath));
         return;
     }
 
-    QJsonDocument doc(updatedData);
-    file.write(doc.toJson());
+    QJsonDocument doc(savedArray);
+    file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
 
-    QMessageBox::information(this, "Success", "Live Tuning data saved successfully!");
+    // Inform the user of the successful save
+    QMessageBox::information(this, "Success", "Live Tuning data saved successfully.");
 }
 
 void MainWindow::onReloadLiveTuning() {
@@ -700,6 +885,8 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->lineEditBindIP->setText(settings.value("Frontend/BindIP", "").toString());
     ui->lineEditPort->setText(settings.value("Frontend/Port", "").toString());
     ui->lineEditPublicAddress->setText(settings.value("Frontend/PublicAddress", "").toString());
+    ui->lineEditReceiveTimeoutMS->setText(settings.value("Frontend/ReceiveTimeoutMS", "").toString());
+    ui->lineEditSendTimeoutMS->setText(settings.value("Frontend/SendTimeoutMS", "").toString());
 
     // Load Auth settings
     ui->lineEditAuthAddress->setText(settings.value("Auth/Address", "").toString());
@@ -717,15 +904,15 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->lineEditNewsUrl->setText(settings.value("PlayerManager/NewsUrl", "").toString());
 
     // Load SQLiteDBManager
-     ui->lineEditSQLiteFileName->setText(settings.value("SQLiteDBManager/FileName", "").toString());
-     ui->lineEditSQLiteMaxBackupNumber->setText(settings.value("SQLiteDBManager/MaxBackupNumber", "").toString());
-     ui->lineEditSQLiteBackupIntervalMinutes->setText(settings.value("SQLiteDBManager/BackupIntervalMinutes", "").toString());
+    ui->lineEditSQLiteFileName->setText(settings.value("SQLiteDBManager/FileName", "").toString());
+    ui->lineEditSQLiteMaxBackupNumber->setText(settings.value("SQLiteDBManager/MaxBackupNumber", "").toString());
+    ui->lineEditSQLiteBackupIntervalMinutes->setText(settings.value("SQLiteDBManager/BackupIntervalMinutes", "").toString());
 
-     // Load JsonDBManager
-     ui->lineEditJsonFileName->setText(settings.value("JsonDBManager/FileName", "").toString());
-     ui->lineEditJsonMaxBackupNumber->setText(settings.value("JsonDBManager/MaxBackupNumber", "").toString());
-     ui->lineEditJsonBackupIntervalMinutes->setText(settings.value("JsonDBManager/BackupIntervalMinutes", "").toString());
-     ui->lineEditJsonPlayerName->setText(settings.value("JsonDBManager/PlayerName", "").toString());
+    // Load JsonDBManager
+    ui->lineEditJsonFileName->setText(settings.value("JsonDBManager/FileName", "").toString());
+    ui->lineEditJsonMaxBackupNumber->setText(settings.value("JsonDBManager/MaxBackupNumber", "").toString());
+    ui->lineEditJsonBackupIntervalMinutes->setText(settings.value("JsonDBManager/BackupIntervalMinutes", "").toString());
+    ui->lineEditJsonPlayerName->setText(settings.value("JsonDBManager/PlayerName", "").toString());
 
     // Load GroupingManager settings
     ui->lineEditMotdPlayerName->setText(settings.value("GroupingManager/MotdPlayerName", "").toString());
@@ -763,6 +950,7 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->lineEditRegionUnvisitedThresholdMS->setText(settings.value("CustomGameOptions/RegionUnvisitedThresholdMS", "").toString());
     ui->checkBoxDisableMovementPowerChargeCost->setChecked(settings.value("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
     ui->checkBoxDisableInstancedLoot->setChecked(settings.value("CustomGameOptions/DisableInstancedLoot", false).toBool());
+    ui->lineEditLootSpawnGridCellRadius->setText(settings.value("CustomGameOptions/LootSpawnGridCellRadius", "").toString());
 
     // Load Billing settings
     ui->lineEditCurrencyBalance->setText(settings.value("Billing/CurrencyBalance", "").toString());
@@ -793,112 +981,160 @@ void MainWindow::onPushButtonLoadConfigClicked()
     QMessageBox::information(this, "Success", "Config loaded successfully!");
 }
 
-void MainWindow::onPushButtonSaveConfigClicked()
-{
-    // Construct the path to config.ini
-    QString mhServerPath = ui->mhServerPathEdit->text();
-    if (mhServerPath.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Please specify the MH Server path.");
+void MainWindow::onPushButtonSaveConfigClicked() {
+    QString configFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/config.ini";
+
+    // Read the existing config.ini file
+    QFile file(configFilePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open config.ini at %1").arg(configFilePath));
         return;
     }
 
-    QString filePath = QDir(mhServerPath).filePath("MHServerEmu/config.ini");
-    QSettings settings(filePath, QSettings::IniFormat);
+    QTextStream in(&file);
+    QStringList lines = in.readAll().split('\n');
+    file.close();
 
-    // Save Logging settings
-    settings.setValue("Logging/EnableLogging", ui->checkBoxEnableLogging->isChecked());
-    settings.setValue("Logging/SynchronousMode", ui->checkBoxSynchronousMode->isChecked());
-    settings.setValue("Logging/HideSensitiveInformation", ui->checkBoxHideSensitiveInformation->isChecked());
-    settings.setValue("Logging/EnableConsole", ui->checkBoxEnableConsole->isChecked());
-    settings.setValue("Logging/ConsoleIncludeTimestamps", ui->checkBoxConsoleIncludeTimestamps->isChecked());
-    settings.setValue("Logging/ConsoleMinLevel", ui->comboBoxConsoleMinLevel->currentIndex());
-    settings.setValue("Logging/ConsoleMaxLevel", ui->comboBoxConsoleMaxLevel->currentIndex());
-    settings.setValue("Logging/FileIncludeTimestamps", ui->checkBoxFileIncludeTimestamps->isChecked());
-    settings.setValue("Logging/FileMinLevel", ui->comboBoxFileMinLevel->currentIndex());
-    settings.setValue("Logging/FileMaxLevel", ui->comboBoxFileMaxLevel->currentIndex());
+    // Map settings dynamically from UI
+    QMap<QString, QString> updatedSettings = {
+        // Logging settings
+        {"Logging/EnableLogging", ui->checkBoxEnableLogging->isChecked() ? "true" : "false"},
+        {"Logging/SynchronousMode", ui->checkBoxSynchronousMode->isChecked() ? "true" : "false"},
+        {"Logging/HideSensitiveInformation", ui->checkBoxHideSensitiveInformation->isChecked() ? "true" : "false"},
+        {"Logging/EnableConsole", ui->checkBoxEnableConsole->isChecked() ? "true" : "false"},
+        {"Logging/ConsoleIncludeTimestamps", ui->checkBoxConsoleIncludeTimestamps->isChecked() ? "true" : "false"},
+        {"Logging/ConsoleMinLevel", QString::number(ui->comboBoxConsoleMinLevel->currentIndex())},
+        {"Logging/ConsoleMaxLevel", QString::number(ui->comboBoxConsoleMaxLevel->currentIndex())},
+        {"Logging/FileIncludeTimestamps", ui->checkBoxFileIncludeTimestamps->isChecked() ? "true" : "false"},
+        {"Logging/FileMinLevel", QString::number(ui->comboBoxFileMinLevel->currentIndex())},
+        {"Logging/FileMaxLevel", QString::number(ui->comboBoxFileMaxLevel->currentIndex())},
 
-    // Save Frontend settings
-    settings.setValue("Frontend/BindIP", ui->lineEditBindIP->text());
-    settings.setValue("Frontend/Port", ui->lineEditPort->text());
-    settings.setValue("Frontend/PublicAddress", ui->lineEditPublicAddress->text());
+        // Frontend settings
+        {"Frontend/BindIP", ui->lineEditBindIP->text()},
+        {"Frontend/Port", ui->lineEditPort->text()},
+        {"Frontend/PublicAddress", ui->lineEditPublicAddress->text()},
+        {"Frontend/ReceiveTimeoutMS", ui->lineEditReceiveTimeoutMS->text()},
+        {"Frontend/SendTimeoutMS", ui->lineEditSendTimeoutMS->text()},
 
-    // Save Auth settings
-    settings.setValue("Auth/Address", ui->lineEditAuthAddress->text());
-    settings.setValue("Auth/Port", ui->lineEditAuthPort->text());
-    settings.setValue("Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked());
+        // Auth settings
+        {"Auth/Address", ui->lineEditAuthAddress->text()},
+        {"Auth/Port", ui->lineEditAuthPort->text()},
+        {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
 
-    // Save PlayerManager settings
-    settings.setValue("PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked());
-    settings.setValue("PlayerManager/IgnoreSessionToken", ui->checkBoxIgnoreSessionToken->isChecked());
-    settings.setValue("PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked());
-    settings.setValue("PlayerManager/SimulateQueue", ui->checkBoxSimulateQueue->isChecked());
-    settings.setValue("PlayerManager/QueuePlaceInLine", ui->lineEditQueuePlaceInLine->text());
-    settings.setValue("PlayerManager/QueueNumberOfPlayersInLine", ui->lineEditQueueNumberOfPlayersInLine->text());
-    settings.setValue("PlayerManager/ShowNewsOnLogin", ui->checkBoxShowNewsOnLogin->isChecked());
-    settings.setValue("PlayerManager/NewsUrl", ui->lineEditNewsUrl->text());
+        // PlayerManager settings
+        {"PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked() ? "true" : "false"},
+        {"PlayerManager/IgnoreSessionToken", ui->checkBoxIgnoreSessionToken->isChecked() ? "true" : "false"},
+        {"PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked() ? "true" : "false"},
+        {"PlayerManager/SimulateQueue", ui->checkBoxSimulateQueue->isChecked() ? "true" : "false"},
+        {"PlayerManager/QueuePlaceInLine", ui->lineEditQueuePlaceInLine->text()},
+        {"PlayerManager/QueueNumberOfPlayersInLine", ui->lineEditQueueNumberOfPlayersInLine->text()},
+        {"PlayerManager/ShowNewsOnLogin", ui->checkBoxShowNewsOnLogin->isChecked() ? "true" : "false"},
+        {"PlayerManager/NewsUrl", ui->lineEditNewsUrl->text()},
 
-    // Save SQLiteDBManager settings
-    settings.setValue("SQLiteDBManager/FileName", ui->lineEditSQLiteFileName->text());
-    settings.setValue("SQLiteDBManager/MaxBackupNumber", ui->lineEditSQLiteMaxBackupNumber->text());
-    settings.setValue("SQLiteDBManager/BackupIntervalMinutes", ui->lineEditSQLiteBackupIntervalMinutes->text());
+        // SQLiteDBManager settings
+        {"SQLiteDBManager/FileName", ui->lineEditSQLiteFileName->text()},
+        {"SQLiteDBManager/MaxBackupNumber", ui->lineEditSQLiteMaxBackupNumber->text()},
+        {"SQLiteDBManager/BackupIntervalMinutes", ui->lineEditSQLiteBackupIntervalMinutes->text()},
 
-    // Save JsonDBManager settings
-    settings.setValue("JsonDBManager/FileName", ui->lineEditJsonFileName->text());
-    settings.setValue("JsonDBManager/MaxBackupNumber", ui->lineEditJsonMaxBackupNumber->text());
-    settings.setValue("JsonDBManager/BackupIntervalMinutes", ui->lineEditJsonBackupIntervalMinutes->text());
-    settings.setValue("JsonDBManager/PlayerName", ui->lineEditJsonPlayerName->text());
+        // JsonDBManager settings
+        {"JsonDBManager/FileName", ui->lineEditJsonFileName->text()},
+        {"JsonDBManager/MaxBackupNumber", ui->lineEditJsonMaxBackupNumber->text()},
+        {"JsonDBManager/BackupIntervalMinutes", ui->lineEditJsonBackupIntervalMinutes->text()},
+        {"JsonDBManager/PlayerName", ui->lineEditJsonPlayerName->text()},
 
-    // Save GroupingManager settings
-    settings.setValue("GroupingManager/MotdPlayerName", ui->lineEditMotdPlayerName->text());
-    settings.setValue("GroupingManager/MotdText", ui->textEditMotdText->toPlainText());
-    settings.setValue("GroupingManager/MotdPrestigeLevel", ui->comboBoxMotdPrestigeLevel->currentIndex());
+        // GroupingManager settings
+        {"GroupingManager/MotdPlayerName", ui->lineEditMotdPlayerName->text()},
+        {"GroupingManager/MotdText", ui->textEditMotdText->toPlainText()},
+        {"GroupingManager/MotdPrestigeLevel", QString::number(ui->comboBoxMotdPrestigeLevel->currentIndex())},
 
-    // Save GameData settings
-    settings.setValue("GameData/LoadAllPrototypes", ui->checkBoxLoadAllPrototypes->isChecked());
-    settings.setValue("GameData/UseEquipmentSlotTableCache", ui->checkBoxUseEquipmentSlotTableCache->isChecked());
+        // GameData settings
+        {"GameData/LoadAllPrototypes", ui->checkBoxLoadAllPrototypes->isChecked() ? "true" : "false"},
+        {"GameData/UseEquipmentSlotTableCache", ui->checkBoxUseEquipmentSlotTableCache->isChecked() ? "true" : "false"},
 
-    // Save GameOptions settings
-    settings.setValue("GameOptions/TeamUpSystemEnabled", ui->checkBoxTeamUpSystemEnabled->isChecked());
-    settings.setValue("GameOptions/AchievementsEnabled", ui->checkBoxAchievementsEnabled->isChecked());
-    settings.setValue("GameOptions/OmegaMissionsEnabled", ui->checkBoxOmegaMissionsEnabled->isChecked());
-    settings.setValue("GameOptions/VeteranRewardsEnabled", ui->checkBoxVeteranRewardsEnabled->isChecked());
-    settings.setValue("GameOptions/MultiSpecRewardsEnabled", ui->checkBoxMultiSpecRewardsEnabled->isChecked());
-    settings.setValue("GameOptions/GiftingEnabled", ui->checkBoxGiftingEnabled->isChecked());
-    settings.setValue("GameOptions/CharacterSelectV2Enabled", ui->checkBoxCharacterSelectV2Enabled->isChecked());
-    settings.setValue("GameOptions/CommunityNewsV2Enabled", ui->checkBoxCommunityNewsV2Enabled->isChecked());
-    settings.setValue("GameOptions/LeaderboardsEnabled", ui->checkBoxLeaderboardsEnabled->isChecked());
-    settings.setValue("GameOptions/NewPlayerExperienceEnabled", ui->checkBoxNewPlayerExperienceEnabled->isChecked());
-    settings.setValue("GameOptions/MissionTrackerV2Enabled", ui->checkBoxMissionTrackerV2Enabled->isChecked());
-    settings.setValue("GameOptions/GiftingAccountAgeInDaysRequired", ui->lineEditGiftingAccountAgeInDaysRequired->text());
-    settings.setValue("GameOptions/GiftingAvatarLevelRequired", ui->lineEditGiftingAvatarLevelRequired->text());
-    settings.setValue("GameOptions/GiftingLoginCountRequired", ui->lineEditGiftingLoginCountRequired->text());
-    settings.setValue("GameOptions/InfinitySystemEnabled", ui->checkBoxInfinitySystemEnabled->isChecked());
-    settings.setValue("GameOptions/GiftingLoginCountRequired", ui->lineEditGiftingLoginCountRequired->text());
-    settings.setValue("GameOptions/ChatBanVoteAccountAgeInDaysRequired", ui->lineEditChatBanVoteAccountAgeInDaysRequired->text());
-    settings.setValue("GameOptions/ChatBanVoteAvatarLevelRequired", ui->lineEditChatBanVoteAvatarLevelRequired->text());
-    settings.setValue("GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked());
-    settings.setValue("GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked());
+        // GameOptions settings
+        {"GameOptions/TeamUpSystemEnabled", ui->checkBoxTeamUpSystemEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/AchievementsEnabled", ui->checkBoxAchievementsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/OmegaMissionsEnabled", ui->checkBoxOmegaMissionsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/VeteranRewardsEnabled", ui->checkBoxVeteranRewardsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/MultiSpecRewardsEnabled", ui->checkBoxMultiSpecRewardsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/GiftingEnabled", ui->checkBoxGiftingEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/CharacterSelectV2Enabled", ui->checkBoxCharacterSelectV2Enabled->isChecked() ? "true" : "false"},
+        {"GameOptions/CommunityNewsV2Enabled", ui->checkBoxCommunityNewsV2Enabled->isChecked() ? "true" : "false"},
+        {"GameOptions/LeaderboardsEnabled", ui->checkBoxLeaderboardsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/NewPlayerExperienceEnabled", ui->checkBoxNewPlayerExperienceEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/MissionTrackerV2Enabled", ui->checkBoxMissionTrackerV2Enabled->isChecked() ? "true" : "false"},
+        {"GameOptions/GiftingAccountAgeInDaysRequired", ui->lineEditGiftingAccountAgeInDaysRequired->text()},
+        {"GameOptions/GiftingAvatarLevelRequired", ui->lineEditGiftingAvatarLevelRequired->text()},
+        {"GameOptions/GiftingLoginCountRequired", ui->lineEditGiftingLoginCountRequired->text()},
+        {"GameOptions/InfinitySystemEnabled", ui->checkBoxInfinitySystemEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/ChatBanVoteAccountAgeInDaysRequired", ui->lineEditChatBanVoteAccountAgeInDaysRequired->text()},
+        {"GameOptions/ChatBanVoteAvatarLevelRequired", ui->lineEditChatBanVoteAvatarLevelRequired->text()},
+        {"GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked() ? "true" : "false"},
 
-    // Save CustomGameOptions settings
-    settings.setValue("CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text());
-    settings.setValue("CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text());
-    settings.setValue("CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked());
-    settings.setValue("CustomGameOptions/DisableInstancedLoot", ui->checkBoxDisableInstancedLoot->isChecked());
+        // CustomGameOptions settings
+        {"CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text()},
+        {"CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text()},
+        {"CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/DisableInstancedLoot", ui->checkBoxDisableInstancedLoot->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/LootSpawnGridCellRadius", ui->lineEditLootSpawnGridCellRadius->text()},
 
-    // Save Billing settings
-    settings.setValue("CustomGameOptions/CurrencyBalance", ui->lineEditCurrencyBalance->text());
-    settings.setValue("CustomGameOptions/ApplyCatalogPatch", ui->checkBoxApplyCatalogPatch->isChecked());
-    settings.setValue("CustomGameOptions/OverrideStoreUrls", ui->checkBoxOverrideStoreUrls->isChecked());
-    settings.setValue("CustomGameOptions/StoreHomePageUrl", ui->lineEditStoreHomePageUrl->text());
-    settings.setValue("CustomGameOptions/StoreHomeBannerPageUrl", ui->lineEditStoreHomeBannerPageUrl->text());
-    settings.setValue("CustomGameOptions/StoreHeroesBannerPageUrl", ui->lineEditStoreHeroesBannerPageUrl->text());
-    settings.setValue("CustomGameOptions/StoreCostumesBannerPageUrl", ui->lineEditStoreCostumesBannerPageUrl->text());
-    settings.setValue("CustomGameOptions/StoreBoostsBannerPageUrl", ui->lineEditStoreBoostsBannerPageUrl->text());
-    settings.setValue("CustomGameOptions/StoreChestsBannerPageUrl", ui->lineEditStoreChestsBannerPageUrl->text());
-    settings.setValue("CustomGameOptions/StoreSpecialsBannerPageUrl", ui->lineEditStoreSpecialsBannerPageUrl->text());
-    settings.setValue("CustomGameOptions/StoreRealMoneyUrl", ui->lineEditStoreRealMoneyUrl->text());
+        // Billing settings
+        {"Billing/CurrencyBalance", ui->lineEditCurrencyBalance->text()},
+        {"Billing/ApplyCatalogPatch", ui->checkBoxApplyCatalogPatch->isChecked() ? "true" : "false"},
+        {"Billing/OverrideStoreUrls", ui->checkBoxOverrideStoreUrls->isChecked() ? "true" : "false"},
+        {"Billing/StoreHomePageUrl", ui->lineEditStoreHomePageUrl->text()},
+        {"Billing/StoreHomeBannerPageUrl", ui->lineEditStoreHomeBannerPageUrl->text()},
+        {"Billing/StoreHeroesBannerPageUrl", ui->lineEditStoreHeroesBannerPageUrl->text()},
+        {"Billing/StoreCostumesBannerPageUrl", ui->lineEditStoreCostumesBannerPageUrl->text()},
+        {"Billing/StoreBoostsBannerPageUrl", ui->lineEditStoreBoostsBannerPageUrl->text()},
+        {"Billing/StoreChestsBannerPageUrl", ui->lineEditStoreChestsBannerPageUrl->text()},
+        {"Billing/StoreSpecialsBannerPageUrl", ui->lineEditStoreSpecialsBannerPageUrl->text()},
+        {"Billing/StoreRealMoneyUrl", ui->lineEditStoreRealMoneyUrl->text()}
+    };
 
-    QMessageBox::information(this, "Success", "Config saved successfully!");
+    // Modify the settings in the existing lines while keeping comments
+    QString currentSection; // Track the current section
+    for (int i = 0; i < lines.size(); ++i) {
+        QString line = lines[i].trimmed();
+
+        // Skip empty lines and comments
+        if (line.isEmpty() || line.startsWith(';')) {
+            continue;
+        }
+
+        // Check if the line defines a section
+        if (line.startsWith('[') && line.endsWith(']')) {
+            currentSection = line.mid(1, line.length() - 2); // Extract section name
+            continue;
+        }
+
+        // Process lines containing '=' within a section
+        if (line.contains('=') && !currentSection.isEmpty()) {
+            QString key = currentSection + '/' + line.section('=', 0, 0).trimmed(); // Combine section and key
+            if (updatedSettings.contains(key)) {
+                qDebug() << "Updating key:" << key
+                         << "Old Value:" << line.section('=', 1).trimmed()
+                         << "New Value:" << updatedSettings[key];
+                lines[i] = QString("%1=%2").arg(line.section('=', 0, 0).trimmed()).arg(updatedSettings[key]); // Update the value
+                updatedSettings.remove(key); // Remove the updated key from the map
+            }
+        }
+    }
+
+    // Write back to the config.ini file
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to save config.ini at %1").arg(configFilePath));
+        return;
+    }
+
+    QTextStream out(&file);
+    for (const QString &line : lines) {
+        out << line << '\n';
+    }
+    file.close();
+
+    QMessageBox::information(this, "Success", "Configuration saved successfully.");
 }
 
 void MainWindow::onUpdateLevelButtonClicked() {
@@ -988,4 +1224,33 @@ void MainWindow::updateServerStatus() {
     output = process.readAllStandardOutput().trimmed();
     bool isApacheRunning = output.contains("httpd.exe");
     ui->apacheServerStatusLabel->setPixmap(isApacheRunning ? onPixmap : offPixmap);
+}
+
+void MainWindow::onServerPathEditUpdated() {
+    QSettings settings("PTM", "MHServerEmuUI");
+    settings.setValue("serverPath", ui->mhServerPathEdit->text());
+}
+
+void MainWindow::onPushButtonSendToServerClicked() {
+    // Ensure the server is running
+    if (serverProcess->state() != QProcess::Running) {
+        QMessageBox::warning(this, "Error", "Server is not running.");
+        return;
+    }
+
+    // Get the text from lineEditSendToServer
+    QString command = ui->lineEditSendToServer->text().trimmed();
+
+    // Ensure the command is not empty
+    if (command.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Command cannot be empty.");
+        return;
+    }
+
+    // Send the command to the server
+    serverProcess->write(command.toUtf8() + "\n");
+    ui->ServerOutputEdit->append("Sent command to server: " + command);
+
+    // Clear the lineEditSendToServer after sending
+    ui->lineEditSendToServer->clear();
 }
