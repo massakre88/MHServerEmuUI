@@ -1,6 +1,10 @@
 #include "mainwindow.h"
 
 #include <QApplication>
+#include <QSslSocket>
+#include <QSslConfiguration>
+#include <QSslCertificate>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {

@@ -345,7 +345,6 @@ void MainWindow::onUpdateButtonClicked() {
         }
     }
 
-    // If any processes are running, notify the user and stop the update
     if (!runningProcesses.isEmpty()) {
         QString message = "The following server processes are running:\n";
         message += runningProcesses.join("\n");
@@ -356,23 +355,15 @@ void MainWindow::onUpdateButtonClicked() {
 
     // Define the nightly build time in GMT+0
     QTime nightlyBuildTime(7, 15, 0); // 7:15 AM GMT+0
-
-    // Get the current UTC time
     QDateTime nowUTC = QDateTime::currentDateTimeUtc();
-
-    // Calculate the correct date for the nightly build
     QDate nightlyDate = nowUTC.date();
     if (nowUTC.time() < nightlyBuildTime) {
         nightlyDate = nightlyDate.addDays(-1); // Use the previous day's date if before build time
     }
 
-    // Get the nightly date in YYYYMMDD format
     QString currentDate = nightlyDate.toString("yyyyMMdd");
-
-    // Construct the download URL with the correct nightly date
     QString downloadUrl = QString("https://nightly.link/Crypto137/MHServerEmu/workflows/nightly-release-windows-x64/master/MHServerEmu-nightly-%1-Release-windows-x64.zip").arg(currentDate);
 
-    // Get the server path for saving the file
     QString serverPath = ui->mhServerPathEdit->text();
     if (serverPath.isEmpty()) {
         QMessageBox::warning(this, "Error", "Server path is empty. Set the path first.");
@@ -382,7 +373,7 @@ void MainWindow::onUpdateButtonClicked() {
     QString zipFilePath = serverPath + "/MHServerEmu-nightly.zip";
     QString extractPath = serverPath + "/MHServerEmu";
 
-    // Prepare backup for files to preserve
+    // Back up files to preserve
     QStringList filesToBackup;
     if (ui->checkBoxUpdateConfigFile->isChecked()) {
         filesToBackup.append("config.ini");
@@ -391,7 +382,7 @@ void MainWindow::onUpdateButtonClicked() {
         filesToBackup.append("Data/Game/LiveTuningData.json");
     }
 
-    QMap<QString, QString> backupFiles; // Map original file paths to backup paths
+    QMap<QString, QString> backupFiles;
     for (const QString &file : filesToBackup) {
         QString originalPath = extractPath + "/" + file;
         QString backupPath = originalPath + ".bak";
@@ -401,107 +392,81 @@ void MainWindow::onUpdateButtonClicked() {
                 qDebug() << "Backed up file:" << originalPath << "to" << backupPath;
             } else {
                 QMessageBox::critical(this, "Error", "Failed to back up file: " + originalPath);
-                qDebug() << "Failed to back up file:" << originalPath;
                 return;
             }
         }
     }
 
-    // Start downloading the file
-    QNetworkAccessManager *manager = new QNetworkAccessManager(this);
-    connect(manager, &QNetworkAccessManager::finished, this, [=](QNetworkReply *reply) {
-        if (reply->error() != QNetworkReply::NoError) {
-            QMessageBox::critical(this, "Error", "Failed to download update: " + reply->errorString());
-            reply->deleteLater();
-            return;
-        }
+    // Use curl to download the nightly build
+    QProcess *curlProcess = new QProcess(this);
+    QStringList curlArguments = {"-L", "--silent", "-o", zipFilePath, downloadUrl};
 
-        // Save the downloaded file
-        QByteArray fileData = reply->readAll();
-        if (fileData.isEmpty()) {
-            QMessageBox::critical(this, "Error", "Downloaded file is empty.");
-            qDebug() << "Downloaded file is empty.";
-            reply->deleteLater();
-            return;
-        }
-
-        QFile file(zipFilePath);
-        if (file.open(QIODevice::WriteOnly)) {
-            file.write(fileData);
-            file.close();
-            qDebug() << "Downloaded file saved to:" << zipFilePath;
-        } else {
-            QMessageBox::critical(this, "Error", "Failed to save downloaded file: " + file.errorString());
-            qDebug() << "Failed to save file:" << zipFilePath << "Error:" << file.errorString();
-            reply->deleteLater();
-            return;
-        }
-
-        // Ensure the ZIP file exists
-        if (!QFile::exists(zipFilePath)) {
-            QMessageBox::critical(this, "Error", "The ZIP file does not exist after saving.");
-            qDebug() << "ZIP file does not exist at:" << zipFilePath;
-            reply->deleteLater();
-            return;
-        }
-
-        // Ensure the extraction path exists
-        QDir dir(extractPath);
-        if (!dir.exists() && !dir.mkpath(".")) {
-            QMessageBox::critical(this, "Error", "Failed to create extraction directory: " + extractPath);
-            qDebug() << "Failed to create directory:" << extractPath;
-            reply->deleteLater();
-            return;
-        }
-
-        // Directly run PowerShell with QProcess
-        QStringList args = {
-            "-NoProfile",
-            "-ExecutionPolicy", "Bypass",
-            "-Command",
-            QString("Expand-Archive -Path '%1' -DestinationPath '%2' -Force").arg(zipFilePath, extractPath)
-        };
-
-        QProcess *process = new QProcess(this);
-        process->setProgram("powershell");
-        process->setArguments(args);
-        connect(process, &QProcess::readyReadStandardOutput, this, [=]() {
-            qDebug() << "PowerShell Output:" << process->readAllStandardOutput();
-        });
-        connect(process, &QProcess::readyReadStandardError, this, [=]() {
-            qDebug() << "PowerShell Error:" << process->readAllStandardError();
-        });
-        connect(process, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
-            if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
-                // Restore backup files
-                for (auto it = backupFiles.begin(); it != backupFiles.end(); ++it) {
-                    QString originalPath = it.key();
-                    QString backupPath = it.value();
-                    if (QFile::exists(originalPath)) {
-                        QFile::remove(originalPath); // Delete new file
-                    }
-                    if (QFile::rename(backupPath, originalPath)) {
-                        qDebug() << "Restored file:" << backupPath << "to" << originalPath;
-                    } else {
-                        QMessageBox::critical(this, "Error", "Failed to restore file: " + backupPath);
-                        qDebug() << "Failed to restore file:" << backupPath;
-                    }
-                }
-
-                QFile::remove(zipFilePath); // Clean up the ZIP file after successful extraction
-                QMessageBox::information(this, "Update", "Update completed successfully.");
-                qDebug() << "Extraction completed successfully. ZIP file deleted.";
-            } else {
-                QMessageBox::critical(this, "Error", QString("Failed to extract update files. Exit Code: %1").arg(exitCode));
-                qDebug() << "PowerShell failed with Exit Code:" << exitCode;
-            }
-        });
-
-        process->start();
-        reply->deleteLater();
+    connect(curlProcess, &QProcess::readyReadStandardOutput, this, [=]() {
+        qDebug() << "Curl Output:" << curlProcess->readAllStandardOutput();
     });
 
-    manager->get(QNetworkRequest(QUrl(downloadUrl)));
+    connect(curlProcess, &QProcess::readyReadStandardError, this, [=]() {
+        qDebug() << "Curl Error:" << curlProcess->readAllStandardError();
+    });
+
+    connect(curlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
+        if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
+            // Ensure the ZIP file exists
+            if (!QFile::exists(zipFilePath)) {
+                QMessageBox::critical(this, "Error", "The ZIP file does not exist after downloading.");
+                return;
+            }
+
+            // Extract the ZIP file
+            QStringList args = {
+                "-NoProfile",
+                "-ExecutionPolicy", "Bypass",
+                "-Command",
+                QString("Expand-Archive -Path '%1' -DestinationPath '%2' -Force").arg(zipFilePath, extractPath)
+            };
+
+            QProcess *extractProcess = new QProcess(this);
+            extractProcess->setProgram("powershell");
+            extractProcess->setArguments(args);
+
+            connect(extractProcess, &QProcess::readyReadStandardOutput, this, [=]() {
+                qDebug() << "PowerShell Output:" << extractProcess->readAllStandardOutput();
+            });
+
+            connect(extractProcess, &QProcess::readyReadStandardError, this, [=]() {
+                qDebug() << "PowerShell Error:" << extractProcess->readAllStandardError();
+            });
+
+            connect(extractProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
+                if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
+                    // Restore backed-up files
+                    for (auto it = backupFiles.begin(); it != backupFiles.end(); ++it) {
+                        QString originalPath = it.key();
+                        QString backupPath = it.value();
+                        if (QFile::exists(originalPath)) {
+                            QFile::remove(originalPath);
+                        }
+                        if (QFile::rename(backupPath, originalPath)) {
+                            qDebug() << "Restored file:" << backupPath << "to" << originalPath;
+                        } else {
+                            QMessageBox::critical(this, "Error", "Failed to restore file: " + backupPath);
+                        }
+                    }
+
+                    QFile::remove(zipFilePath); // Clean up ZIP file
+                    QMessageBox::information(this, "Update", "Update completed successfully.");
+                } else {
+                    QMessageBox::critical(this, "Error", "Failed to extract update files.");
+                }
+            });
+
+            extractProcess->start();
+        } else {
+            QMessageBox::critical(this, "Error", "Failed to download update via curl.");
+        }
+    });
+
+    curlProcess->start("curl", curlArguments);
 }
 
 void MainWindow::onDownloadFinished(QNetworkReply *reply) {
