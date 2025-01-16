@@ -90,6 +90,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->KickButton, &QPushButton::clicked, this, &MainWindow::onKickButtonClicked);
     connect(ui->mhServerPathEdit, &QLineEdit::editingFinished, this, &MainWindow::onServerPathEditUpdated);
     connect(ui->pushButtonSendToServer, &QPushButton::clicked, this, &MainWindow::onPushButtonSendToServerClicked);
+    connect(ui->horizontalSliderCosmicChaosSwitch, &QSlider::valueChanged, this, &MainWindow::onCosmicChaosSwitchChanged);
+    connect(ui->horizontalSliderMidtownMadnessSwitch, &QSlider::valueChanged, this, &MainWindow::onMidtownMadnessSwitchChanged);
+    connect(ui->horizontalSliderArmorIncursionSwitch, &QSlider::valueChanged, this, &MainWindow::onArmorIncursionSwitchChanged);
 }
 
 MainWindow::~MainWindow() {
@@ -382,6 +385,12 @@ void MainWindow::onUpdateButtonClicked() {
         filesToBackup.append("Data/Game/LiveTuningData.json");
     }
 
+    // Add files from the Billing folder if the checkbox is checked
+    if (ui->checkBoxUpdateSaveStore->isChecked()) {
+        filesToBackup.append("Data/Billing/Catalog.json"); // Replace with actual file names
+        filesToBackup.append("Data/Billing/CatalogPatch.json");
+    }
+
     QMap<QString, QString> backupFiles;
     for (const QString &file : filesToBackup) {
         QString originalPath = extractPath + "/" + file;
@@ -411,7 +420,6 @@ void MainWindow::onUpdateButtonClicked() {
 
     connect(curlProcess, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, [=](int exitCode, QProcess::ExitStatus exitStatus) {
         if (exitCode == 0 && exitStatus == QProcess::NormalExit) {
-            // Ensure the ZIP file exists
             if (!QFile::exists(zipFilePath)) {
                 QMessageBox::critical(this, "Error", "The ZIP file does not exist after downloading.");
                 return;
@@ -1219,3 +1227,275 @@ void MainWindow::onPushButtonSendToServerClicked() {
     // Clear the lineEditSendToServer after sending
     ui->lineEditSendToServer->clear();
 }
+
+void MainWindow::onCosmicChaosSwitchChanged(int value) {
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+
+    if (!QFile::exists(filePath)) {
+        qDebug() << "File does not exist.";
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isArray()) {
+        qDebug() << "Invalid JSON structure.";
+        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
+        return;
+    }
+
+    QJsonArray dataArray = doc.array();
+    bool updated = false;
+
+    // Adjust values based on slider position
+    double adjustment = (value == 1) ? 0.42 : -0.42;
+    QStringList targetSettings = {
+        "eGTV_XPGain",
+        "eGTV_LootRarity",
+        "eGTV_LootSpecialDropRate",
+        "eGTV_PartyXPBonusPct",
+        "eGTV_CosmicPrestigeXPPct"
+    };
+
+    for (int i = 0; i < dataArray.size(); ++i) {
+        QJsonObject obj = dataArray[i].toObject();
+
+        // Update "Cosmic Chaos Event" values
+        if (obj["Prototype"].toString().contains("CosmicChaosEvent", Qt::CaseInsensitive)) {
+            if (obj.contains("Value")) {
+                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable event
+                dataArray[i] = obj;
+                updated = true;
+            }
+        }
+
+        // Adjust specific settings
+        if (targetSettings.contains(obj["Setting"].toString())) {
+            if (obj.contains("Value")) {
+                double currentValue = obj["Value"].toDouble();
+                obj["Value"] = currentValue + adjustment;
+                dataArray[i] = obj;
+                qDebug() << QString("Adjusted %1 to %2").arg(obj["Setting"].toString()).arg(obj["Value"].toDouble());
+            }
+        }
+    }
+
+    if (!updated) {
+        QMessageBox::warning(this, "Warning", "No entries for 'Cosmic Chaos Event' found in the JSON file.");
+        return;
+    }
+
+    // Save the modified JSON back to the file
+    doc.setArray(dataArray);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        return;
+    }
+
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+    qDebug() << "JSON file updated successfully.";
+
+    // Send the broadcast message
+    QString broadcastMessage = (value == 1)
+                                   ? "The Cosmic Chaos Event has started!"
+                                   : "The Cosmic Chaos Event has ended!";
+    if (serverProcess->state() == QProcess::Running) {
+        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
+        serverProcess->write(broadcastCommand.toUtf8());
+        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
+
+        // Reload live tuning data
+        serverProcess->write("!server reloadlivetuning\n");
+        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
+    } else {
+        QMessageBox::warning(this, "Error", "Server is not running.");
+    }
+
+    // Notify the user
+    QString status = (value == 1) ? "enabled" : "disabled";
+    ui->ServerOutputEdit->append(QString("Cosmic Chaos event %1.").arg(status));
+}
+
+void MainWindow::onMidtownMadnessSwitchChanged(int value) {
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+
+    if (!QFile::exists(filePath)) {
+        qDebug() << "File does not exist.";
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isArray()) {
+        qDebug() << "Invalid JSON structure.";
+        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
+        return;
+    }
+
+    QJsonArray dataArray = doc.array();
+    bool updated = false;
+
+    // Locate and update the specific "Midtown Madness" entry
+    for (int i = 0; i < dataArray.size(); ++i) {
+        QJsonObject obj = dataArray[i].toObject();
+        if (obj["Prototype"].toString() == "Loot/Tables/Mob/Bosses/PatrolMidtown/Subtable/SharedMidtownMADNESS.prototype" &&
+            obj["Setting"].toString() == "eLTTV_Enabled") {
+            if (obj.contains("Value")) {
+                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable the event
+                dataArray[i] = obj;
+                updated = true;
+                break; // Stop after updating the relevant entry
+            }
+        }
+    }
+
+    if (!updated) {
+        QMessageBox::warning(this, "Warning", "No entries for 'Midtown Madness Event' found in the JSON file.");
+        return;
+    }
+
+    // Save the modified JSON back to the file
+    doc.setArray(dataArray);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        return;
+    }
+
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+    qDebug() << "JSON file updated successfully.";
+
+    // Send the broadcast message
+    QString broadcastMessage = (value == 1)
+                                   ? "The Midtown Madness Event has started!"
+                                   : "The Midtown Madness Event has ended!";
+    if (serverProcess->state() == QProcess::Running) {
+        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
+        serverProcess->write(broadcastCommand.toUtf8());
+        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
+
+        // Reload live tuning data
+        serverProcess->write("!server reloadlivetuning\n");
+        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
+    } else {
+        QMessageBox::warning(this, "Error", "Server is not running.");
+    }
+
+    // Notify the user
+    QString status = (value == 1) ? "enabled" : "disabled";
+    ui->ServerOutputEdit->append(QString("Midtown Madness event %1.").arg(status));
+}
+
+void MainWindow::onArmorIncursionSwitchChanged(int value) {
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+
+    if (!QFile::exists(filePath)) {
+        qDebug() << "File does not exist.";
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isArray()) {
+        qDebug() << "Invalid JSON structure.";
+        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
+        return;
+    }
+
+    QJsonArray dataArray = doc.array();
+    bool updated = false;
+
+    // Update "ArmorDriveEvent" entries
+    for (int i = 0; i < dataArray.size(); ++i) {
+        QJsonObject obj = dataArray[i].toObject();
+
+        if (obj["Prototype"].toString().contains("ArmorDriveEvent", Qt::CaseInsensitive)) {
+            if (obj.contains("Value")) {
+                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable event
+                dataArray[i] = obj;
+                updated = true;
+            }
+        }
+    }
+
+    // Adjust "eGTV_XPGain" setting
+    for (int i = 0; i < dataArray.size(); ++i) {
+        QJsonObject obj = dataArray[i].toObject();
+
+        if (obj["Setting"].toString() == "eGTV_XPGain") {
+            if (obj.contains("Value")) {
+                double currentValue = obj["Value"].toDouble();
+                obj["Value"] = (value == 1) ? (currentValue * 2.0) : (currentValue / 2.0);
+                dataArray[i] = obj;
+                updated = true;
+                qDebug() << QString("Adjusted eGTV_XPGain to %1").arg(obj["Value"].toDouble());
+                break; // No need to continue after finding and updating this entry
+            }
+        }
+    }
+
+    if (!updated) {
+        QMessageBox::warning(this, "Warning", "No relevant entries for 'Armor Incursion Event' found in the JSON file.");
+        return;
+    }
+
+    // Save the modified JSON back to the file
+    doc.setArray(dataArray);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        return;
+    }
+
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+    qDebug() << "JSON file updated successfully.";
+
+    // Send the broadcast message
+    QString broadcastMessage = (value == 1)
+                                   ? "The Armor Incursion Event has started!"
+                                   : "The Armor Incursion Event has ended!";
+    if (serverProcess->state() == QProcess::Running) {
+        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
+        serverProcess->write(broadcastCommand.toUtf8());
+        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
+
+        // Reload live tuning data
+        serverProcess->write("!server reloadlivetuning\n");
+        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
+    } else {
+        QMessageBox::warning(this, "Error", "Server is not running.");
+    }
+
+    // Notify the user
+    QString status = (value == 1) ? "enabled" : "disabled";
+    ui->ServerOutputEdit->append(QString("Armor Incursion event %1.").arg(status));
+}
+

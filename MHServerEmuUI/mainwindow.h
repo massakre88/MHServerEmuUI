@@ -50,6 +50,9 @@ private slots:
     void onKickButtonClicked();
     void onServerPathEditUpdated();
     void onPushButtonSendToServerClicked();
+    void onCosmicChaosSwitchChanged(int value);
+    void onMidtownMadnessSwitchChanged(int value);
+    void onArmorIncursionSwitchChanged(int value);
 
 private:
     Ui::MainWindow *ui;

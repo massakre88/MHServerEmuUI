@@ -5,5 +5,7 @@
         <file alias="Background">background.jpg</file>
         <file alias="on">on.png</file>
         <file alias="off">off.png</file>
+        <file alias="CosmicChaos">EventCosmicChaos.jpg</file>
+        <file alias="ArmorIncursion">armorEvent.jpg</file>
     </qresource>
 </RCC>
