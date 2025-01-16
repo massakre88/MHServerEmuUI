@@ -1,8 +1,14 @@
 # **MHServerEmuUI**
 
+<<<<<<< HEAD
 ### **A Modern GUI for Simplifying MHServerEmu Management**
 
 MHServerEmuUI provides a streamlined and intuitive interface for managing the MHServerEmu game server. Designed with ease of use in mind, this GUI consolidates all essential server operations into one powerful tool.
+=======
+### **A GUI for Simplifying MHServerEmu Management**
+
+MHServerEmuUI provides an interface for managing the MHServerEmu game server. Designed with ease of use in mind, this GUI consolidates many essential server operations into one tool.
+>>>>>>> bf937cc84d9ed903d74b0b1fd4643e3ea7a53e4c
 
 ---
 
@@ -10,9 +16,16 @@ MHServerEmuUI provides a streamlined and intuitive interface for managing the MH
 - **User-Friendly Interface**: Manage your server effortlessly with a clear and organized GUI.
 - **Event Management**: Toggle special events like Cosmic Chaos and Armor Incursion with just a click.
 - **Live Tuning Adjustments**: Easily modify game settings in real-time, including XP rates, loot drop chances, and more.
+<<<<<<< HEAD
 - **Nightly Updates**: Automatically download and apply the latest server updates.
 - **Backup Management**: Ensure critical files like `config.ini` and live tuning data are preserved during updates.
 - **Broadcast Messaging**: Send server-wide announcements to keep players informed.
+=======
+- **Nightly Updates**: One button click to download and apply the latest server updates.
+- **Backup Management**: Ensure critical files like `config.ini`, live tuning data and custom store are preserved during updates.
+- **Broadcast Messaging**: Send server-wide announcements to keep players informed.
+- **Server shutdown timer**: Send a server-wide message that the server is going to shutdown with the number of minutes until it happens.
+>>>>>>> bf937cc84d9ed903d74b0b1fd4643e3ea7a53e4c
 
 ---
 
@@ -29,7 +42,11 @@ MHServerEmuUI provides a streamlined and intuitive interface for managing the MH
    - Run the **setup tool** provided with MHServerEmu to initialize the server.
 
 2. **Set Up MHServerEmuUI**:
+<<<<<<< HEAD
    - Clone this repository or download the latest release from [GitHub](https://github.com/Pyrox37/MHServerEmuUI).
+=======
+   - Clone this repository or download the latest release from [GitHub](https://github.com/Pyrox37/MHServerEmuUI/releases).
+>>>>>>> bf937cc84d9ed903d74b0b1fd4643e3ea7a53e4c
    - Build the project using **Qt Creator** (or use the provided prebuilt executable).
 
 3. **First Run**:
@@ -40,7 +57,11 @@ MHServerEmuUI provides a streamlined and intuitive interface for managing the MH
 
 ## **Usage Guide**
 ### **Key Features**
+<<<<<<< HEAD
 - **Server Control**: Start, stop, and monitor your server with ease. Server shutdown with a timer and broadcast messages.
+=======
+- **Server Control**: Start, stop, and monitor your server with ease.
+>>>>>>> bf937cc84d9ed903d74b0b1fd4643e3ea7a53e4c
 - **Event Toggles**: Enable or disable game events like:
   - **Cosmic Chaos**
   - **Armor Incursion**
