@@ -853,6 +853,8 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->checkBoxFileIncludeTimestamps->setChecked(settings.value("Logging/FileIncludeTimestamps", false).toBool());
     ui->comboBoxFileMinLevel->setCurrentIndex(settings.value("Logging/FileMinLevel", 0).toInt());
     ui->comboBoxFileMaxLevel->setCurrentIndex(settings.value("Logging/FileMaxLevel", 5).toInt());
+    ui->lineEditFileChannels->setText(settings.value("Logging/FileChannels", "").toString());
+    ui->checkBoxFileSplitOutput->setChecked(settings.value("Logging/FileSplitOutput", false).toBool());
 
     // Load Frontend settings
     ui->lineEditBindIP->setText(settings.value("Frontend/BindIP", "").toString());
@@ -981,6 +983,8 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Logging/FileIncludeTimestamps", ui->checkBoxFileIncludeTimestamps->isChecked() ? "true" : "false"},
         {"Logging/FileMinLevel", QString::number(ui->comboBoxFileMinLevel->currentIndex())},
         {"Logging/FileMaxLevel", QString::number(ui->comboBoxFileMaxLevel->currentIndex())},
+        {"Logging/FileChannels", ui->lineEditFileChannels->text()},
+        {"Logging/FileSplitOutput", ui->checkBoxFileSplitOutput->isChecked() ? "true" : "false"},
 
         // Frontend settings
         {"Frontend/BindIP", ui->lineEditBindIP->text()},
@@ -1229,17 +1233,24 @@ void MainWindow::onPushButtonSendToServerClicked() {
 }
 
 void MainWindow::onCosmicChaosSwitchChanged(int value) {
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    QString serverFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    QString backupFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/BACKUP_LiveTuningData.json";
+    QString programFilePath = QApplication::applicationDirPath() + "/LiveTuningData.json";
 
-    if (!QFile::exists(filePath)) {
+    qDebug() << "Server File Path:" << serverFilePath;
+    qDebug() << "Backup File Path:" << backupFilePath;
+    qDebug() << "Program File Path:" << programFilePath;
+
+    if (!QFile::exists(serverFilePath)) {
         qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(serverFilePath));
         return;
     }
 
-    QFile file(filePath);
+    QFile file(serverFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        qDebug() << "Failed to open file for reading:" << file.errorString();
         return;
     }
 
@@ -1254,7 +1265,10 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
     }
 
     QJsonArray dataArray = doc.array();
-    bool updated = false;
+    qDebug() << "JSON Array Size:" << dataArray.size();
+
+    bool updatedCosmicEvent = false; // Tracks changes to CosmicChaosEvent
+    bool updatedSettings = false;   // Tracks changes to target settings
 
     // Adjust values based on slider position
     double adjustment = (value == 1) ? 0.42 : -0.42;
@@ -1274,7 +1288,7 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
             if (obj.contains("Value")) {
                 obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable event
                 dataArray[i] = obj;
-                updated = true;
+                updatedCosmicEvent = true;
             }
         }
 
@@ -1284,13 +1298,48 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
                 double currentValue = obj["Value"].toDouble();
                 obj["Value"] = currentValue + adjustment;
                 dataArray[i] = obj;
+                updatedSettings = true;
                 qDebug() << QString("Adjusted %1 to %2").arg(obj["Setting"].toString()).arg(obj["Value"].toDouble());
             }
         }
     }
 
-    if (!updated) {
-        QMessageBox::warning(this, "Warning", "No entries for 'Cosmic Chaos Event' found in the JSON file.");
+    // If no updates were made for Cosmic Chaos Event, prompt to replace file
+    if (!updatedCosmicEvent) {
+        qDebug() << "No relevant entries for Cosmic Chaos Event were found.";
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "Missing Entries",
+            "No relevant entries for 'Cosmic Chaos Event' found in the JSON file.\n"
+            "Would you like to replace it with the updated LiveTuningData.json file from the program directory?",
+            QMessageBox::Yes | QMessageBox::No
+            );
+
+        if (reply == QMessageBox::Yes) {
+            // Back up existing file
+            if (QFile::rename(serverFilePath, backupFilePath)) {
+                qDebug() << "Backup created:" << backupFilePath;
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to create a backup of the existing LiveTuningData.json file.");
+                qDebug() << "Failed to create backup:" << serverFilePath;
+                return;
+            }
+
+            // Copy updated file
+            if (QFile::copy(programFilePath, serverFilePath)) {
+                QMessageBox::information(this, "Success", "LiveTuningData.json has been replaced successfully.");
+                qDebug() << "Replaced LiveTuningData.json with:" << programFilePath;
+
+                // Reset slider to off position
+                ui->horizontalSliderCosmicChaosSwitch->blockSignals(true);
+                ui->horizontalSliderCosmicChaosSwitch->setValue(0);
+                ui->horizontalSliderCosmicChaosSwitch->blockSignals(false);
+                qDebug() << "Slider reset to off position.";
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to copy the updated LiveTuningData.json file.");
+                qDebug() << "Failed to copy updated file from:" << programFilePath;
+            }
+        }
         return;
     }
 
@@ -1298,6 +1347,7 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
     doc.setArray(dataArray);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        qDebug() << "Failed to open file for writing:" << file.errorString();
         return;
     }
 
@@ -1327,17 +1377,24 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
 }
 
 void MainWindow::onMidtownMadnessSwitchChanged(int value) {
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    QString serverFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    QString backupFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/BACKUP_LiveTuningData.json";
+    QString programFilePath = QApplication::applicationDirPath() + "/LiveTuningData.json";
 
-    if (!QFile::exists(filePath)) {
+    qDebug() << "Server File Path:" << serverFilePath;
+    qDebug() << "Backup File Path:" << backupFilePath;
+    qDebug() << "Program File Path:" << programFilePath;
+
+    if (!QFile::exists(serverFilePath)) {
         qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(serverFilePath));
         return;
     }
 
-    QFile file(filePath);
+    QFile file(serverFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        qDebug() << "Failed to open file for reading:" << file.errorString();
         return;
     }
 
@@ -1352,6 +1409,8 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
     }
 
     QJsonArray dataArray = doc.array();
+    qDebug() << "JSON Array Size:" << dataArray.size();
+
     bool updated = false;
 
     // Locate and update the specific "Midtown Madness" entry
@@ -1363,13 +1422,48 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
                 obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable the event
                 dataArray[i] = obj;
                 updated = true;
+                qDebug() << QString("Updated eLTTV_Enabled: Value changed to %1").arg(obj["Value"].toDouble());
                 break; // Stop after updating the relevant entry
             }
         }
     }
 
+    // If no updates were made, prompt to replace the file
     if (!updated) {
-        QMessageBox::warning(this, "Warning", "No entries for 'Midtown Madness Event' found in the JSON file.");
+        qDebug() << "No relevant entries for Midtown Madness were found.";
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "Missing Entries",
+            "No relevant entries for 'Midtown Madness Event' found in the JSON file.\n"
+            "Would you like to replace it with the updated LiveTuningData.json file from the program directory?",
+            QMessageBox::Yes | QMessageBox::No
+            );
+
+        if (reply == QMessageBox::Yes) {
+            // Back up the existing file
+            if (QFile::rename(serverFilePath, backupFilePath)) {
+                qDebug() << "Backup created:" << backupFilePath;
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to create a backup of the existing LiveTuningData.json file.");
+                qDebug() << "Failed to create backup:" << serverFilePath;
+                return;
+            }
+
+            // Copy the updated file
+            if (QFile::copy(programFilePath, serverFilePath)) {
+                QMessageBox::information(this, "Success", "LiveTuningData.json has been replaced successfully.");
+                qDebug() << "Replaced LiveTuningData.json with:" << programFilePath;
+
+                // Reset slider to off position
+                ui->horizontalSliderMidtownMadnessSwitch->blockSignals(true);
+                ui->horizontalSliderMidtownMadnessSwitch->setValue(0);
+                ui->horizontalSliderMidtownMadnessSwitch->blockSignals(false);
+                qDebug() << "Slider reset to off position.";
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to copy the updated LiveTuningData.json file.");
+                qDebug() << "Failed to copy updated file from:" << programFilePath;
+            }
+        }
         return;
     }
 
@@ -1377,6 +1471,7 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
     doc.setArray(dataArray);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        qDebug() << "Failed to open file for writing:" << file.errorString();
         return;
     }
 
@@ -1406,17 +1501,24 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
 }
 
 void MainWindow::onArmorIncursionSwitchChanged(int value) {
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    QString serverFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    QString backupFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/BACKUP_LiveTuningData.json";
+    QString programFilePath = QApplication::applicationDirPath() + "/LiveTuningData.json";
 
-    if (!QFile::exists(filePath)) {
+    qDebug() << "Server File Path:" << serverFilePath;
+    qDebug() << "Backup File Path:" << backupFilePath;
+    qDebug() << "Program File Path:" << programFilePath;
+
+    if (!QFile::exists(serverFilePath)) {
         qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(serverFilePath));
         return;
     }
 
-    QFile file(filePath);
+    QFile file(serverFilePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        qDebug() << "Failed to open file for reading:" << file.errorString();
         return;
     }
 
@@ -1431,7 +1533,10 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
     }
 
     QJsonArray dataArray = doc.array();
-    bool updated = false;
+    qDebug() << "JSON Array Size:" << dataArray.size();
+
+    bool updatedArmorEvent = false; // Tracks changes to ArmorDriveEvent
+    bool updatedXPGain = false;    // Tracks changes to eGTV_XPGain
 
     // Update "ArmorDriveEvent" entries
     for (int i = 0; i < dataArray.size(); ++i) {
@@ -1439,9 +1544,14 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
 
         if (obj["Prototype"].toString().contains("ArmorDriveEvent", Qt::CaseInsensitive)) {
             if (obj.contains("Value")) {
+                double oldValue = obj["Value"].toDouble();
                 obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable event
                 dataArray[i] = obj;
-                updated = true;
+                updatedArmorEvent = true;
+                qDebug() << QString("Updated Prototype '%1': Value changed from %2 to %3")
+                                .arg(obj["Prototype"].toString())
+                                .arg(oldValue)
+                                .arg(obj["Value"].toDouble());
             }
         }
     }
@@ -1452,18 +1562,54 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
 
         if (obj["Setting"].toString() == "eGTV_XPGain") {
             if (obj.contains("Value")) {
-                double currentValue = obj["Value"].toDouble();
-                obj["Value"] = (value == 1) ? (currentValue * 2.0) : (currentValue / 2.0);
+                double oldValue = obj["Value"].toDouble();
+                obj["Value"] = (value == 1) ? (oldValue * 2.0) : (oldValue / 2.0);
                 dataArray[i] = obj;
-                updated = true;
-                qDebug() << QString("Adjusted eGTV_XPGain to %1").arg(obj["Value"].toDouble());
-                break; // No need to continue after finding and updating this entry
+                updatedXPGain = true;
+                qDebug() << QString("Adjusted eGTV_XPGain: Value changed from %1 to %2")
+                                .arg(oldValue)
+                                .arg(obj["Value"].toDouble());
+                break;
             }
         }
     }
 
-    if (!updated) {
-        QMessageBox::warning(this, "Warning", "No relevant entries for 'Armor Incursion Event' found in the JSON file.");
+    // If no updates were made for ArmorDriveEvent, prompt to replace file
+    if (!updatedArmorEvent) {
+        qDebug() << "No relevant entries for ArmorDriveEvent were found.";
+        QMessageBox::StandardButton reply = QMessageBox::question(
+            this,
+            "Missing Entries",
+            "No relevant entries for 'Armor Incursion Event' found in the JSON file.\n"
+            "Would you like to replace it with the updated LiveTuningData.json file from the program directory?",
+            QMessageBox::Yes | QMessageBox::No
+            );
+
+        if (reply == QMessageBox::Yes) {
+            // Back up existing file
+            if (QFile::rename(serverFilePath, backupFilePath)) {
+                qDebug() << "Backup created:" << backupFilePath;
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to create a backup of the existing LiveTuningData.json file.");
+                qDebug() << "Failed to create backup:" << serverFilePath;
+                return;
+            }
+
+            // Copy updated file
+            if (QFile::copy(programFilePath, serverFilePath)) {
+                QMessageBox::information(this, "Success", "LiveTuningData.json has been replaced successfully.");
+                qDebug() << "Replaced LiveTuningData.json with:" << programFilePath;
+
+                // Reset slider to off position
+                ui->horizontalSliderArmorIncursionSwitch->blockSignals(true);
+                ui->horizontalSliderArmorIncursionSwitch->setValue(0);
+                ui->horizontalSliderArmorIncursionSwitch->blockSignals(false);
+                qDebug() << "Slider reset to off position.";
+            } else {
+                QMessageBox::critical(this, "Error", "Failed to copy the updated LiveTuningData.json file.");
+                qDebug() << "Failed to copy updated file from:" << programFilePath;
+            }
+        }
         return;
     }
 
@@ -1471,6 +1617,7 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
     doc.setArray(dataArray);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        qDebug() << "Failed to open file for writing:" << file.errorString();
         return;
     }
 
@@ -1478,7 +1625,7 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
     file.close();
     qDebug() << "JSON file updated successfully.";
 
-    // Send the broadcast message
+    // Broadcast message and reload live tuning
     QString broadcastMessage = (value == 1)
                                    ? "The Armor Incursion Event has started!"
                                    : "The Armor Incursion Event has ended!";
@@ -1487,15 +1634,12 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
         serverProcess->write(broadcastCommand.toUtf8());
         ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
 
-        // Reload live tuning data
         serverProcess->write("!server reloadlivetuning\n");
         ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
     } else {
         QMessageBox::warning(this, "Error", "Server is not running.");
     }
 
-    // Notify the user
     QString status = (value == 1) ? "enabled" : "disabled";
     ui->ServerOutputEdit->append(QString("Armor Incursion event %1.").arg(status));
 }
-
