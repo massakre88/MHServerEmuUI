@@ -16,6 +16,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include <QTimer>
+#include <QInputDialog>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -37,6 +38,9 @@ MainWindow::MainWindow(QWidget *parent)
     if (offPixmap.isNull()) {
         qDebug() << "Failed to load /images/off from resource file.";
     }
+
+    // Set up user list context menu
+    setupUserListContextMenu();
 
     // Set initial status indicators
     ui->mhServerStatusLabel->setPixmap(offPixmap);
@@ -68,6 +72,9 @@ MainWindow::MainWindow(QWidget *parent)
         ui->mhServerPathEdit->setText(savedPath);
     }
 
+    // Initialize event states based on LiveTuningData.json
+    initializeEventStates();
+
     connect(ui->pushButtonShutdown, &QPushButton::clicked, this, &MainWindow::onPushButtonShutdownClicked);
     connect(ui->loadLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onLoadLiveTuning);
     connect(ui->saveLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onSaveLiveTuning);
@@ -93,6 +100,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->horizontalSliderCosmicChaosSwitch, &QSlider::valueChanged, this, &MainWindow::onCosmicChaosSwitchChanged);
     connect(ui->horizontalSliderMidtownMadnessSwitch, &QSlider::valueChanged, this, &MainWindow::onMidtownMadnessSwitchChanged);
     connect(ui->horizontalSliderArmorIncursionSwitch, &QSlider::valueChanged, this, &MainWindow::onArmorIncursionSwitchChanged);
+    connect(ui->horizontalSliderOdinsBountySwitch, &QSlider::valueChanged, this, &MainWindow::onOdinsBountySwitchChanged);
+    connect(ui->pushButtonRefreshUsers, &QPushButton::clicked, this, &MainWindow::refreshLoggedInUsers);
 }
 
 MainWindow::~MainWindow() {
@@ -187,24 +196,50 @@ void MainWindow::stopServer() {
     if (serverProcess->state() == QProcess::Running) {
         serverProcess->terminate();
         if (!serverProcess->waitForFinished(5000)) { // Wait up to 5 seconds
+            qDebug() << "MHServerEmu.exe did not terminate in time. Forcing kill.";
             serverProcess->kill(); // Force kill if not finished
+            serverProcess->waitForFinished(); // Ensure it's fully killed
         }
+    } else {
+        qDebug() << "MHServerEmu.exe is not running. Skipping terminate.";
     }
 
     // Stop Apache process
     if (apacheProcess->state() == QProcess::Running) {
         apacheProcess->terminate();
         if (!apacheProcess->waitForFinished(5000)) { // Wait up to 5 seconds
+            qDebug() << "Apache process did not terminate in time. Forcing kill.";
             apacheProcess->kill(); // Force kill if not finished
+            apacheProcess->waitForFinished(); // Ensure it's fully killed
         }
+    } else {
+        qDebug() << "Apache process is not running. Skipping terminate.";
     }
 
     // Reconnect error handling
     connect(serverProcess, &QProcess::errorOccurred, this, &MainWindow::handleServerError);
 
     // Fallback: Ensure both processes are killed using taskkill
-    QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "MHServerEmu.exe");
-    QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "httpd.exe");
+    QProcess taskCheckProcess;
+    taskCheckProcess.start("tasklist", QStringList() << "/FI" << "IMAGENAME eq MHServerEmu.exe");
+    taskCheckProcess.waitForFinished();
+    QString taskCheckOutput = QString::fromLocal8Bit(taskCheckProcess.readAllStandardOutput());
+    if (taskCheckOutput.contains("MHServerEmu.exe")) {
+        QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "MHServerEmu.exe");
+        qDebug() << "Fallback: MHServerEmu.exe killed.";
+    } else {
+        qDebug() << "Fallback: MHServerEmu.exe is not running.";
+    }
+
+    taskCheckProcess.start("tasklist", QStringList() << "/FI" << "IMAGENAME eq httpd.exe");
+    taskCheckProcess.waitForFinished();
+    taskCheckOutput = QString::fromLocal8Bit(taskCheckProcess.readAllStandardOutput());
+    if (taskCheckOutput.contains("httpd.exe")) {
+        QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "httpd.exe");
+        qDebug() << "Fallback: httpd.exe killed.";
+    } else {
+        qDebug() << "Fallback: httpd.exe is not running.";
+    }
 
     ui->ServerOutputEdit->append("Server stopped.");
     playerCount = 0; // Reset player count
@@ -281,6 +316,9 @@ void MainWindow::onPushButtonShutdownClicked() {
 }
 
 void MainWindow::readServerOutput() {
+    static bool isProcessingClientInfo = false;
+    static QString clientInfoBuffer;
+
     QByteArray output = serverProcess->readAllStandardOutput();
     QString outputText = QString::fromLocal8Bit(output);
 
@@ -296,14 +334,52 @@ void MainWindow::readServerOutput() {
         ui->ServerOutputEdit->append("<Error>: " + errorText);
     }
 
-    // Check for player connection or disconnection logs
+    QStringList lines = outputText.split('\n', Qt::SkipEmptyParts);
+
+    for (const QString &line : lines) {
+        // Check for the start of client info
+        if (line.contains("SessionId:") && !isProcessingClientInfo) {
+            isProcessingClientInfo = true;
+            clientInfoBuffer.clear();
+        }
+
+        // Accumulate client info lines
+        if (isProcessingClientInfo) {
+            clientInfoBuffer.append(line + '\n');
+
+            // Detect the end of the client info block (e.g., an empty line or the next unrelated log entry)
+            if (!line.contains(":")) { // A heuristic to detect unrelated lines
+                isProcessingClientInfo = false;
+                displayUserInfo(clientInfoBuffer.trimmed());
+                qDebug() << "User info block processed:\n" << clientInfoBuffer;
+                clientInfoBuffer.clear();
+            }
+        }
+    }
+
+    // Check for player connection logs
     if (outputText.contains("[PlayerConnectionManager] Accepted and registered client")) {
         playerCount++; // Increment player count
-    } else if (outputText.contains("[PlayerConnectionManager] Removed client")) {
+        parseLoginEvent(outputText); // Parse the login event to extract user details
+    }
+    // Check for player disconnection logs
+    else if (outputText.contains("[PlayerConnectionManager] Removed client")) {
+        QRegularExpression regex(R"(\[Account=(.+) \(.*?\), SessionId=(0x[0-9A-Fa-f]+)\])");
+        QRegularExpressionMatch match = regex.match(outputText);
+        if (match.hasMatch()) {
+            QString username = match.captured(1).trimmed();
+            QString sessionId = match.captured(2).trimmed();
+            removeUserFromList(sessionId); // Remove user from the list
+            removeUserFromLoggedInMap(sessionId); // Remove user from the map
+            qDebug() << "Logged out user removed:" << username << "SessionId:" << sessionId;
+        } else {
+            qDebug() << "Failed to parse logout event.";
+        }
         playerCount--; // Decrement player count
         if (playerCount < 0) playerCount = 0; // Ensure count doesn't go negative
     }
 
+    // Check for server shutdown
     if (outputText.contains("[ServerManager] Shutdown finished")) {
         QProcess::execute("taskkill", QStringList() << "/F" << "/IM" << "MHServerEmu.exe");
         playerCount = 0; // Reset player count
@@ -319,7 +395,7 @@ void MainWindow::updatePlayerCountLabel() {
 }
 
 void MainWindow::handleServerError() {
-   // QMessageBox::critical(this, "Error", "An error occurred in the server process.");
+   QMessageBox::critical(this, "Error", "An error occurred in the server process.");
 }
 
 void MainWindow::onStartClientButtonClicked() {
@@ -329,6 +405,34 @@ void MainWindow::onStartClientButtonClicked() {
         QProcess *process = new QProcess(this);
         process->setWorkingDirectory(serverPath); // Set the working directory
         process->startDetached("cmd.exe", {"/C", batFilePath}); // Pass the full .bat path
+    }
+}
+
+void MainWindow::parseLoginEvent(const QString &logLine) {
+    QRegularExpression regex(R"(\[Account=(.+) \(0x[0-9A-Fa-f]+\), SessionId=(0x[0-9A-Fa-f]+)\])");
+    QRegularExpressionMatch match = regex.match(logLine);
+
+    if (match.hasMatch()) {
+        QString accountName = match.captured(1);
+        QString sessionId = match.captured(2);
+
+        // Store the user details
+        loggedInUsers[sessionId] = accountName;
+        qDebug() << "Logged in user added:" << accountName << "SessionId:" << sessionId;
+
+        // Update the list
+        refreshLoggedInUsers();
+    }
+}
+
+void MainWindow::refreshLoggedInUsers() {
+    ui->listWidgetLoggedInUsers->clear(); // Clear the current list
+
+    for (auto it = loggedInUsers.begin(); it != loggedInUsers.end(); ++it) {
+        QListWidgetItem *item = new QListWidgetItem(it.value(), ui->listWidgetLoggedInUsers); // Use username as text
+        item->setData(Qt::UserRole, it.key()); // Set session ID as UserRole data
+        ui->listWidgetLoggedInUsers->addItem(item);
+        qDebug() << "Refreshed user:" << it.value() << "SessionId:" << it.key();
     }
 }
 
@@ -528,6 +632,10 @@ void MainWindow::onLoadLiveTuning()
         {"eLTV_", "Loot"},
         {"eMTV_", "Mission"},
         {"eCTV_", "Condition"},
+        {"eAETV_", "Avatar Entity"},
+        {"eATV_", "Area"},
+        {"ePOTV_", "Population Object"},
+        {"eMFTV_", "Metrics Frequency"},
         {"ePETV_", "Public Events"}
     };
 
@@ -1232,25 +1340,47 @@ void MainWindow::onPushButtonSendToServerClicked() {
     ui->lineEditSendToServer->clear();
 }
 
+void MainWindow::initializeEventStates() {
+    QSettings settings("PTM", "MHServerEmuUI");
+
+    int cosmicChaosState = settings.value("CosmicChaosEvent", 0).toInt();
+    ui->horizontalSliderCosmicChaosSwitch->blockSignals(true);
+    ui->horizontalSliderCosmicChaosSwitch->setValue(cosmicChaosState);
+    ui->horizontalSliderCosmicChaosSwitch->blockSignals(false);
+
+    int armorIncursionState = settings.value("ArmorIncursionEvent", 0).toInt();
+    ui->horizontalSliderArmorIncursionSwitch->blockSignals(true);
+    ui->horizontalSliderArmorIncursionSwitch->setValue(armorIncursionState);
+    ui->horizontalSliderArmorIncursionSwitch->blockSignals(false);
+
+    int midtownMadnessState = settings.value("MidtownMadnessEvent", 0).toInt();
+    ui->horizontalSliderMidtownMadnessSwitch->blockSignals(true);
+    ui->horizontalSliderMidtownMadnessSwitch->setValue(midtownMadnessState);
+    ui->horizontalSliderMidtownMadnessSwitch->blockSignals(false);
+
+    int odinsBountyState = settings.value("OdinsBountyEvent", 0).toInt();
+    ui->horizontalSliderOdinsBountySwitch->blockSignals(true);
+    ui->horizontalSliderOdinsBountySwitch->setValue(odinsBountyState);
+    ui->horizontalSliderOdinsBountySwitch->blockSignals(false);
+}
+
 void MainWindow::onCosmicChaosSwitchChanged(int value) {
-    QString serverFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
-    QString backupFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/BACKUP_LiveTuningData.json";
-    QString programFilePath = QApplication::applicationDirPath() + "/LiveTuningData.json";
+    // Save the state
+    QSettings settings("PTM", "MHServerEmuUI");
+    settings.setValue("CosmicChaosEvent", value);
 
-    qDebug() << "Server File Path:" << serverFilePath;
-    qDebug() << "Backup File Path:" << backupFilePath;
-    qDebug() << "Program File Path:" << programFilePath;
+    // Update the livetuningdata.json file and perform other tasks (existing logic)
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
 
-    if (!QFile::exists(serverFilePath)) {
+    if (!QFile::exists(filePath)) {
         qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(serverFilePath));
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
         return;
     }
 
-    QFile file(serverFilePath);
+    QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
-        qDebug() << "Failed to open file for reading:" << file.errorString();
         return;
     }
 
@@ -1265,12 +1395,9 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
     }
 
     QJsonArray dataArray = doc.array();
-    qDebug() << "JSON Array Size:" << dataArray.size();
+    bool updated = false;
 
-    bool updatedCosmicEvent = false; // Tracks changes to CosmicChaosEvent
-    bool updatedSettings = false;   // Tracks changes to target settings
-
-    // Adjust values based on slider position
+    // Update Cosmic Chaos Event values (existing logic)
     double adjustment = (value == 1) ? 0.42 : -0.42;
     QStringList targetSettings = {
         "eGTV_XPGain",
@@ -1283,118 +1410,72 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
     for (int i = 0; i < dataArray.size(); ++i) {
         QJsonObject obj = dataArray[i].toObject();
 
-        // Update "Cosmic Chaos Event" values
         if (obj["Prototype"].toString().contains("CosmicChaosEvent", Qt::CaseInsensitive)) {
             if (obj.contains("Value")) {
-                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable event
+                obj["Value"] = (value == 1) ? 2.0 : 0.0;
                 dataArray[i] = obj;
-                updatedCosmicEvent = true;
+                updated = true;
             }
         }
 
-        // Adjust specific settings
         if (targetSettings.contains(obj["Setting"].toString())) {
             if (obj.contains("Value")) {
                 double currentValue = obj["Value"].toDouble();
                 obj["Value"] = currentValue + adjustment;
                 dataArray[i] = obj;
-                updatedSettings = true;
                 qDebug() << QString("Adjusted %1 to %2").arg(obj["Setting"].toString()).arg(obj["Value"].toDouble());
             }
         }
     }
 
-    // If no updates were made for Cosmic Chaos Event, prompt to replace file
-    if (!updatedCosmicEvent) {
-        qDebug() << "No relevant entries for Cosmic Chaos Event were found.";
-        QMessageBox::StandardButton reply = QMessageBox::question(
-            this,
-            "Missing Entries",
-            "No relevant entries for 'Cosmic Chaos Event' found in the JSON file.\n"
-            "Would you like to replace it with the updated LiveTuningData.json file from the program directory?",
-            QMessageBox::Yes | QMessageBox::No
-            );
-
-        if (reply == QMessageBox::Yes) {
-            // Back up existing file
-            if (QFile::rename(serverFilePath, backupFilePath)) {
-                qDebug() << "Backup created:" << backupFilePath;
-            } else {
-                QMessageBox::critical(this, "Error", "Failed to create a backup of the existing LiveTuningData.json file.");
-                qDebug() << "Failed to create backup:" << serverFilePath;
-                return;
-            }
-
-            // Copy updated file
-            if (QFile::copy(programFilePath, serverFilePath)) {
-                QMessageBox::information(this, "Success", "LiveTuningData.json has been replaced successfully.");
-                qDebug() << "Replaced LiveTuningData.json with:" << programFilePath;
-
-                // Reset slider to off position
-                ui->horizontalSliderCosmicChaosSwitch->blockSignals(true);
-                ui->horizontalSliderCosmicChaosSwitch->setValue(0);
-                ui->horizontalSliderCosmicChaosSwitch->blockSignals(false);
-                qDebug() << "Slider reset to off position.";
-            } else {
-                QMessageBox::critical(this, "Error", "Failed to copy the updated LiveTuningData.json file.");
-                qDebug() << "Failed to copy updated file from:" << programFilePath;
-            }
-        }
+    if (!updated) {
+        QMessageBox::warning(this, "Warning", "No entries for 'Cosmic Chaos Event' found in the JSON file.");
         return;
     }
 
-    // Save the modified JSON back to the file
+    // Save the modified JSON
     doc.setArray(dataArray);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        qDebug() << "Failed to open file for writing:" << file.errorString();
         return;
     }
 
     file.write(doc.toJson(QJsonDocument::Indented));
     file.close();
-    qDebug() << "JSON file updated successfully.";
 
-    // Send the broadcast message
+    // Notify user and broadcast
     QString broadcastMessage = (value == 1)
                                    ? "The Cosmic Chaos Event has started!"
                                    : "The Cosmic Chaos Event has ended!";
     if (serverProcess->state() == QProcess::Running) {
-        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
-        serverProcess->write(broadcastCommand.toUtf8());
+        serverProcess->write(QString("!server broadcast %1\n").arg(broadcastMessage).toUtf8());
         ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
-
-        // Reload live tuning data
         serverProcess->write("!server reloadlivetuning\n");
         ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
     } else {
         QMessageBox::warning(this, "Error", "Server is not running.");
     }
 
-    // Notify the user
     QString status = (value == 1) ? "enabled" : "disabled";
     ui->ServerOutputEdit->append(QString("Cosmic Chaos event %1.").arg(status));
 }
 
 void MainWindow::onMidtownMadnessSwitchChanged(int value) {
-    QString serverFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
-    QString backupFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/BACKUP_LiveTuningData.json";
-    QString programFilePath = QApplication::applicationDirPath() + "/LiveTuningData.json";
+    // Save the state using QSettings
+    QSettings settings("PTM", "MHServerEmuUI");
+    settings.setValue("MidtownMadnessEvent", value);
 
-    qDebug() << "Server File Path:" << serverFilePath;
-    qDebug() << "Backup File Path:" << backupFilePath;
-    qDebug() << "Program File Path:" << programFilePath;
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
 
-    if (!QFile::exists(serverFilePath)) {
+    if (!QFile::exists(filePath)) {
         qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(serverFilePath));
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
         return;
     }
 
-    QFile file(serverFilePath);
+    QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
-        qDebug() << "Failed to open file for reading:" << file.errorString();
         return;
     }
 
@@ -1409,8 +1490,6 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
     }
 
     QJsonArray dataArray = doc.array();
-    qDebug() << "JSON Array Size:" << dataArray.size();
-
     bool updated = false;
 
     // Locate and update the specific "Midtown Madness" entry
@@ -1422,48 +1501,13 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
                 obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable the event
                 dataArray[i] = obj;
                 updated = true;
-                qDebug() << QString("Updated eLTTV_Enabled: Value changed to %1").arg(obj["Value"].toDouble());
                 break; // Stop after updating the relevant entry
             }
         }
     }
 
-    // If no updates were made, prompt to replace the file
     if (!updated) {
-        qDebug() << "No relevant entries for Midtown Madness were found.";
-        QMessageBox::StandardButton reply = QMessageBox::question(
-            this,
-            "Missing Entries",
-            "No relevant entries for 'Midtown Madness Event' found in the JSON file.\n"
-            "Would you like to replace it with the updated LiveTuningData.json file from the program directory?",
-            QMessageBox::Yes | QMessageBox::No
-            );
-
-        if (reply == QMessageBox::Yes) {
-            // Back up the existing file
-            if (QFile::rename(serverFilePath, backupFilePath)) {
-                qDebug() << "Backup created:" << backupFilePath;
-            } else {
-                QMessageBox::critical(this, "Error", "Failed to create a backup of the existing LiveTuningData.json file.");
-                qDebug() << "Failed to create backup:" << serverFilePath;
-                return;
-            }
-
-            // Copy the updated file
-            if (QFile::copy(programFilePath, serverFilePath)) {
-                QMessageBox::information(this, "Success", "LiveTuningData.json has been replaced successfully.");
-                qDebug() << "Replaced LiveTuningData.json with:" << programFilePath;
-
-                // Reset slider to off position
-                ui->horizontalSliderMidtownMadnessSwitch->blockSignals(true);
-                ui->horizontalSliderMidtownMadnessSwitch->setValue(0);
-                ui->horizontalSliderMidtownMadnessSwitch->blockSignals(false);
-                qDebug() << "Slider reset to off position.";
-            } else {
-                QMessageBox::critical(this, "Error", "Failed to copy the updated LiveTuningData.json file.");
-                qDebug() << "Failed to copy updated file from:" << programFilePath;
-            }
-        }
+        QMessageBox::warning(this, "Warning", "No entries for 'Midtown Madness Event' found in the JSON file.");
         return;
     }
 
@@ -1471,7 +1515,6 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
     doc.setArray(dataArray);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        qDebug() << "Failed to open file for writing:" << file.errorString();
         return;
     }
 
@@ -1501,24 +1544,21 @@ void MainWindow::onMidtownMadnessSwitchChanged(int value) {
 }
 
 void MainWindow::onArmorIncursionSwitchChanged(int value) {
-    QString serverFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
-    QString backupFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/BACKUP_LiveTuningData.json";
-    QString programFilePath = QApplication::applicationDirPath() + "/LiveTuningData.json";
+    // Save the state using QSettings
+    QSettings settings("PTM", "MHServerEmuUI");
+    settings.setValue("ArmorIncursionEvent", value);
 
-    qDebug() << "Server File Path:" << serverFilePath;
-    qDebug() << "Backup File Path:" << backupFilePath;
-    qDebug() << "Program File Path:" << programFilePath;
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
 
-    if (!QFile::exists(serverFilePath)) {
+    if (!QFile::exists(filePath)) {
         qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(serverFilePath));
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
         return;
     }
 
-    QFile file(serverFilePath);
+    QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
-        qDebug() << "Failed to open file for reading:" << file.errorString();
         return;
     }
 
@@ -1533,83 +1573,35 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
     }
 
     QJsonArray dataArray = doc.array();
-    qDebug() << "JSON Array Size:" << dataArray.size();
+    bool updated = false;
 
-    bool updatedArmorEvent = false; // Tracks changes to ArmorDriveEvent
-    bool updatedXPGain = false;    // Tracks changes to eGTV_XPGain
-
-    // Update "ArmorDriveEvent" entries
+    // Adjust values for "ARMOR Drive Event"
     for (int i = 0; i < dataArray.size(); ++i) {
         QJsonObject obj = dataArray[i].toObject();
 
-        if (obj["Prototype"].toString().contains("ArmorDriveEvent", Qt::CaseInsensitive)) {
+        // Enable or disable all "ARMORDriveEvent" entries
+        if (obj["Prototype"].toString().contains("ARMORDriveEvent", Qt::CaseInsensitive)) {
             if (obj.contains("Value")) {
-                double oldValue = obj["Value"].toDouble();
-                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable event
+                obj["Value"] = (value == 1) ? 2.0 : 0.0;
                 dataArray[i] = obj;
-                updatedArmorEvent = true;
-                qDebug() << QString("Updated Prototype '%1': Value changed from %2 to %3")
-                                .arg(obj["Prototype"].toString())
-                                .arg(oldValue)
-                                .arg(obj["Value"].toDouble());
+                updated = true;
             }
         }
-    }
 
-    // Adjust "eGTV_XPGain" setting
-    for (int i = 0; i < dataArray.size(); ++i) {
-        QJsonObject obj = dataArray[i].toObject();
-
+        // Multiply or reset the value for "eGTV_XPGain"
         if (obj["Setting"].toString() == "eGTV_XPGain") {
             if (obj.contains("Value")) {
-                double oldValue = obj["Value"].toDouble();
-                obj["Value"] = (value == 1) ? (oldValue * 2.0) : (oldValue / 2.0);
+                double currentValue = obj["Value"].toDouble();
+                obj["Value"] = (value == 1) ? currentValue * 2 : currentValue / 2;
                 dataArray[i] = obj;
-                updatedXPGain = true;
-                qDebug() << QString("Adjusted eGTV_XPGain: Value changed from %1 to %2")
-                                .arg(oldValue)
-                                .arg(obj["Value"].toDouble());
-                break;
+                updated = true;
+                qDebug() << QString("Adjusted eGTV_XPGain: Value changed to %1").arg(obj["Value"].toDouble());
             }
         }
     }
 
-    // If no updates were made for ArmorDriveEvent, prompt to replace file
-    if (!updatedArmorEvent) {
-        qDebug() << "No relevant entries for ArmorDriveEvent were found.";
-        QMessageBox::StandardButton reply = QMessageBox::question(
-            this,
-            "Missing Entries",
-            "No relevant entries for 'Armor Incursion Event' found in the JSON file.\n"
-            "Would you like to replace it with the updated LiveTuningData.json file from the program directory?",
-            QMessageBox::Yes | QMessageBox::No
-            );
-
-        if (reply == QMessageBox::Yes) {
-            // Back up existing file
-            if (QFile::rename(serverFilePath, backupFilePath)) {
-                qDebug() << "Backup created:" << backupFilePath;
-            } else {
-                QMessageBox::critical(this, "Error", "Failed to create a backup of the existing LiveTuningData.json file.");
-                qDebug() << "Failed to create backup:" << serverFilePath;
-                return;
-            }
-
-            // Copy updated file
-            if (QFile::copy(programFilePath, serverFilePath)) {
-                QMessageBox::information(this, "Success", "LiveTuningData.json has been replaced successfully.");
-                qDebug() << "Replaced LiveTuningData.json with:" << programFilePath;
-
-                // Reset slider to off position
-                ui->horizontalSliderArmorIncursionSwitch->blockSignals(true);
-                ui->horizontalSliderArmorIncursionSwitch->setValue(0);
-                ui->horizontalSliderArmorIncursionSwitch->blockSignals(false);
-                qDebug() << "Slider reset to off position.";
-            } else {
-                QMessageBox::critical(this, "Error", "Failed to copy the updated LiveTuningData.json file.");
-                qDebug() << "Failed to copy updated file from:" << programFilePath;
-            }
-        }
+    if (!updated) {
+        QMessageBox::warning(this, "Warning", "No entries for 'Armor Incursion Event' found in the JSON file.");
         return;
     }
 
@@ -1617,7 +1609,6 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
     doc.setArray(dataArray);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        qDebug() << "Failed to open file for writing:" << file.errorString();
         return;
     }
 
@@ -1625,21 +1616,223 @@ void MainWindow::onArmorIncursionSwitchChanged(int value) {
     file.close();
     qDebug() << "JSON file updated successfully.";
 
-    // Broadcast message and reload live tuning
+    // Send the broadcast message
     QString broadcastMessage = (value == 1)
-                                   ? "The Armor Incursion Event has started!"
-                                   : "The Armor Incursion Event has ended!";
+                                   ? "The ARMOR Incursion Event has started!"
+                                   : "The ARMOR Incursion Event has ended!";
     if (serverProcess->state() == QProcess::Running) {
         QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
         serverProcess->write(broadcastCommand.toUtf8());
         ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
 
+        // Reload live tuning data
         serverProcess->write("!server reloadlivetuning\n");
         ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
     } else {
         QMessageBox::warning(this, "Error", "Server is not running.");
     }
 
+    // Notify the user
     QString status = (value == 1) ? "enabled" : "disabled";
     ui->ServerOutputEdit->append(QString("Armor Incursion event %1.").arg(status));
+}
+
+void MainWindow::onOdinsBountySwitchChanged(int value) {
+    // Save the state using QSettings
+    QSettings settings("PTM", "MHServerEmuUI");
+    settings.setValue("OdinsBountyEvent", value);
+
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+
+    if (!QFile::exists(filePath)) {
+        qDebug() << "File does not exist.";
+        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+        return;
+    }
+
+    QFile file(filePath);
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+        return;
+    }
+
+    QByteArray jsonData = file.readAll();
+    file.close();
+
+    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
+    if (doc.isNull() || !doc.isArray()) {
+        qDebug() << "Invalid JSON structure.";
+        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
+        return;
+    }
+
+    QJsonArray dataArray = doc.array();
+    bool updated = false;
+
+    // Define the prototypes for Odin's Bounty event
+    QStringList odinsBountyPrototypes = {
+        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinBrooklynBuffed.prototype",
+        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinDangerRoomBuffed.prototype",
+        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinHightownBuffed.prototype",
+        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinMidtownBuffed.prototype",
+        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinUltronBuffed.prototype"
+    };
+
+    // Adjust the relevant entries in the JSON array
+    for (int i = 0; i < dataArray.size(); ++i) {
+        QJsonObject obj = dataArray[i].toObject();
+        if (odinsBountyPrototypes.contains(obj["Prototype"].toString()) &&
+            obj["Setting"].toString() == "eLTTV_Enabled") {
+            if (obj.contains("Value")) {
+                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable the event
+                dataArray[i] = obj;
+                updated = true;
+            }
+        }
+    }
+
+    if (!updated) {
+        QMessageBox::warning(this, "Warning", "No entries for 'Odin's Bounty Event' found in the JSON file.");
+        return;
+    }
+
+    // Save the modified JSON back to the file
+    doc.setArray(dataArray);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
+        return;
+    }
+
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+    qDebug() << "JSON file updated successfully.";
+
+    // Send the broadcast message
+    QString broadcastMessage = (value == 1)
+                                   ? "Odin's Bounty Event has started!"
+                                   : "Odin's Bounty Event has ended!";
+    if (serverProcess->state() == QProcess::Running) {
+        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
+        serverProcess->write(broadcastCommand.toUtf8());
+        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
+
+        // Reload live tuning data
+        serverProcess->write("!server reloadlivetuning\n");
+        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
+    } else {
+        QMessageBox::warning(this, "Error", "Server is not running.");
+    }
+
+    // Notify the user
+    QString status = (value == 1) ? "enabled" : "disabled";
+    ui->ServerOutputEdit->append(QString("Odin's Bounty event %1.").arg(status));
+}
+
+void MainWindow::setupUserListContextMenu() {
+    // Enable the context menu on the QListWidget
+    ui->listWidgetLoggedInUsers->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->listWidgetLoggedInUsers, &QWidget::customContextMenuRequested, this, &MainWindow::showUserContextMenu);
+}
+
+void MainWindow::showUserContextMenu(const QPoint &pos) {
+    QListWidgetItem *item = ui->listWidgetLoggedInUsers->itemAt(pos);
+    if (!item) return; // No item under the cursor
+
+    // Create the context menu
+    QMenu contextMenu(this);
+
+    // Existing actions
+    QAction *kickUserAction = new QAction("Kick User", &contextMenu);
+    QAction *banUserAction = new QAction("Ban User", &contextMenu);
+
+    // New "Get User Info" action
+    QAction *getUserInfoAction = new QAction("Get User Info", &contextMenu);
+
+    // Connect actions to slots
+    connect(kickUserAction, &QAction::triggered, this, &MainWindow::kickUser);
+    connect(banUserAction, &QAction::triggered, this, &MainWindow::banUser);
+
+    // Connect "Get User Info" action to sendClientInfoCommand
+    connect(getUserInfoAction, &QAction::triggered, this, [this, item]() {
+        QString sessionId = item->data(Qt::UserRole).toString();
+        sendClientInfoCommand(sessionId);
+    });
+
+    // Add actions to the context menu
+    contextMenu.addAction(kickUserAction);
+    contextMenu.addAction(banUserAction);
+    contextMenu.addAction(getUserInfoAction);
+
+    // Show the context menu
+    contextMenu.exec(ui->listWidgetLoggedInUsers->mapToGlobal(pos));
+}
+
+void MainWindow::addUserToList(const QString &username, const QString &sessionId) {
+    QListWidgetItem *item = new QListWidgetItem(username, ui->listWidgetLoggedInUsers);
+    item->setData(Qt::UserRole, sessionId);
+    qDebug() << "Set SessionId for" << username << ":" << item->data(Qt::UserRole).toString();
+    ui->listWidgetLoggedInUsers->addItem(item);
+    qDebug() << "Logged in user added:" << username << "SessionId:" << sessionId;
+}
+
+void MainWindow::removeUserFromList(const QString &sessionId) {
+    for (int i = 0; i < ui->listWidgetLoggedInUsers->count(); ++i) {
+        QListWidgetItem *item = ui->listWidgetLoggedInUsers->item(i);
+        if (item->data(Qt::UserRole).toString() == sessionId) {
+            qDebug() << "Removing user with SessionId:" << sessionId;
+            delete ui->listWidgetLoggedInUsers->takeItem(i);
+            return;
+        }
+    }
+    qDebug() << "No user found with SessionId:" << sessionId;
+    removeUserFromLoggedInMap(sessionId);
+}
+
+void MainWindow::removeUserFromLoggedInMap(const QString &sessionId) {
+    if (loggedInUsers.remove(sessionId)) {
+        qDebug() << "Removed user from map with SessionId:" << sessionId;
+    } else {
+        qDebug() << "SessionId not found in map:" << sessionId;
+    }
+}
+
+void MainWindow::sendClientInfoCommand(const QString &sessionId) {
+    if (sessionId.isEmpty()) {
+        qDebug() << "Invalid session ID.";
+        return;
+    }
+
+    QString command = QString("!client info %1\n").arg(sessionId);
+    serverProcess->write(command.toUtf8());
+    qDebug() << "Sent command:" << command;
+}
+
+void MainWindow::displayUserInfo(const QString &info) {
+    ui->userInfoDisplay->setPlainText(info);
+}
+
+void MainWindow::kickUser() {
+    // Get the selected user from the list
+    QListWidgetItem *item = ui->listWidgetLoggedInUsers->currentItem();
+    if (!item) return;
+
+    // Extract the player name (assuming the player's name is stored as the item text)
+    QString playerName = item->text();
+
+    // Construct and send the kick command
+    QString command = QString("!client kick %1\n").arg(playerName);
+
+    serverProcess->write(command.toUtf8());
+    ui->ServerOutputEdit->append(QString("Kicked user: %1").arg(playerName));
+}
+
+void MainWindow::banUser() {
+    QListWidgetItem *item = ui->listWidgetLoggedInUsers->currentItem();
+    if (!item) return;
+
+    QString accountName = item->text(); // Assuming the user name is displayed
+    QString command = QString("!account ban %1\n").arg(accountName);
+
+    serverProcess->write(command.toUtf8());
+    ui->ServerOutputEdit->append(QString("Banned user: %1").arg(accountName));
 }

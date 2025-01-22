@@ -53,6 +53,10 @@ private slots:
     void onCosmicChaosSwitchChanged(int value);
     void onMidtownMadnessSwitchChanged(int value);
     void onArmorIncursionSwitchChanged(int value);
+    void onOdinsBountySwitchChanged(int value);
+    void showUserContextMenu(const QPoint &pos); // Show context menu on right-click
+    void kickUser();                            // Kick the selected user
+    void banUser();                             // Ban the selected user
 
 private:
     Ui::MainWindow *ui;
@@ -70,7 +74,17 @@ private:
     QPixmap onPixmap;  // Image for the "on" state
     QPixmap offPixmap; // Image for the "off" state
     QTimer *statusCheckTimer; // Timer to periodically check status
-    void updateServerStatus();    
+    void updateServerStatus();
+    void initializeEventStates();
+    void parseLoginEvent(const QString &logLine);
+    QMap<QString, QString> loggedInUsers; // Map SessionId -> Account Name
+    void refreshLoggedInUsers();
+    void setupUserListContextMenu(); // Sets up the context menu for the user list
+    void addUserToList(const QString &username, const QString &sessionId);
+    void removeUserFromList(const QString &sessionId);
+    void removeUserFromLoggedInMap(const QString &sessionId);
+    void sendClientInfoCommand(const QString &sessionId);
+    void displayUserInfo(const QString &info); // For displaying info
 };
 
 #endif // MAINWINDOW_H

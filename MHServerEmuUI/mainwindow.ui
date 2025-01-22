@@ -10,6 +10,24 @@
     <height>680</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1072</width>
+    <height>680</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1072</width>
+    <height>680</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>MHServerEmuUI</string>
   </property>
@@ -7873,6 +7891,388 @@ border: 1px solid gray;</string>
       </property>
       <property name="text">
        <string>Send</string>
+      </property>
+     </widget>
+     <widget class="QListWidget" name="listWidgetLoggedInUsers">
+      <property name="geometry">
+       <rect>
+        <x>755</x>
+        <y>39</y>
+        <width>305</width>
+        <height>441</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QPushButton" name="pushButtonRefreshUsers">
+      <property name="geometry">
+       <rect>
+        <x>840</x>
+        <y>5</y>
+        <width>141</width>
+        <height>28</height>
+       </rect>
+      </property>
+      <property name="palette">
+       <palette>
+        <active>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Midlight">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>227</red>
+            <green>227</green>
+            <blue>227</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Dark">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Mid">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ButtonText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Shadow">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>105</red>
+            <green>105</green>
+            <blue>105</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ToolTipText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="PlaceholderText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="128">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </active>
+        <inactive>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Midlight">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>227</red>
+            <green>227</green>
+            <blue>227</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Dark">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Mid">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ButtonText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Shadow">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>105</red>
+            <green>105</green>
+            <blue>105</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ToolTipText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="PlaceholderText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="128">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </inactive>
+        <disabled>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Midlight">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>227</red>
+            <green>227</green>
+            <blue>227</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Dark">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Mid">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ButtonText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>160</red>
+            <green>160</green>
+            <blue>160</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>211</red>
+            <green>211</green>
+            <blue>211</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Shadow">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>105</red>
+            <green>105</green>
+            <blue>105</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ToolTipText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="PlaceholderText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="128">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </disabled>
+       </palette>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: solid;
+ background-color: lightgray;
+ color: black;
+ border: 1px solid gray;
+ padding: 5px 10px;
+ border-radius: 3px;</string>
+      </property>
+      <property name="text">
+       <string>Refresh Users</string>
+      </property>
+     </widget>
+     <widget class="QTextEdit" name="userInfoDisplay">
+      <property name="geometry">
+       <rect>
+        <x>755</x>
+        <y>490</y>
+        <width>305</width>
+        <height>129</height>
+       </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+color: white;</string>
+      </property>
+      <property name="placeholderText">
+       <string>User information will be displayed here.</string>
       </property>
      </widget>
     </widget>
@@ -18499,59 +18899,6 @@ color: white;</string>
      <attribute name="title">
       <string>Events</string>
      </attribute>
-     <widget class="QGroupBox" name="groupBoxLunarNewYear">
-      <property name="geometry">
-       <rect>
-        <x>410</x>
-        <y>300</y>
-        <width>421</width>
-        <height>261</height>
-       </rect>
-      </property>
-      <property name="styleSheet">
-       <string notr="true">background: transparent;
-color: white;</string>
-      </property>
-      <property name="title">
-       <string>Lunar New Year</string>
-      </property>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>-30</x>
-         <y>80</y>
-         <width>461</width>
-         <height>221</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;Enemies will have a chance of dropping a Lucky Red Envelope which&lt;br/&gt;can hold items from Catalysts, Elements, Uniques, and much more.&lt;br/&gt;You even have a chance to grab some rare boxes in the Envelopes!&lt;br/&gt;You can also find Lunar Dragons and Lunar Lanterns by defeating enemies&lt;br/&gt;anywhere in the game which can be sold for additional credits!&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;Daily Log-in Gifts:&lt;br/&gt;8 Cube Shards&lt;br/&gt;Two Hour Credit Find Boost potions (+20 credits per potion)&lt;br/&gt;A stack of 50 Festive Fireworks&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pushButton">
-       <property name="geometry">
-        <rect>
-         <x>100</x>
-         <y>20</y>
-         <width>201</width>
-         <height>91</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="resources.qrc">
-         <normaloff>:/images/LunarNewYear</normaloff>:/images/LunarNewYear</iconset>
-       </property>
-       <property name="iconSize">
-        <size>
-         <width>200</width>
-         <height>200</height>
-        </size>
-       </property>
-      </widget>
-     </widget>
      <widget class="QLabel" name="labelWIP">
       <property name="geometry">
        <rect>
@@ -18778,8 +19125,8 @@ color: white;</string>
        <rect>
         <x>20</x>
         <y>40</y>
-        <width>371</width>
-        <height>271</height>
+        <width>231</width>
+        <height>191</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -18792,7 +19139,7 @@ color: white;</string>
       <widget class="QPushButton" name="pushButtonCosmicChaos">
        <property name="geometry">
         <rect>
-         <x>80</x>
+         <x>10</x>
          <y>20</y>
          <width>201</width>
          <height>91</height>
@@ -18812,24 +19159,11 @@ color: white;</string>
         </size>
        </property>
       </widget>
-      <widget class="QLabel" name="labelCosmicChaos">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>110</y>
-         <width>351</width>
-         <height>111</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Cosmic Questions Answered&lt;br/&gt;&lt;/span&gt;What is the answer to Life, The Universe and Everything? The &lt;br/&gt;answer is a 42% server-side multiplicative boost to Rare Item Find, Special&lt;br/&gt;Item Find and Experience for all your heroes.&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Cosmic Prestige Doubled&lt;br/&gt;&lt;/span&gt;Doubled leveling rate for Cosmic Prestige during Cosmic Chaos.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-       </property>
-      </widget>
       <widget class="QSlider" name="horizontalSliderCosmicChaosSwitch">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>250</y>
+         <x>70</x>
+         <y>160</y>
          <width>81</width>
          <height>16</height>
         </rect>
@@ -18847,8 +19181,8 @@ color: white;</string>
       <widget class="QLabel" name="labelCosmicChaosSwitchOff">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>230</y>
+         <x>60</x>
+         <y>140</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -18860,8 +19194,8 @@ color: white;</string>
       <widget class="QLabel" name="labelCosmicChaosSwitchOn">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>230</y>
+         <x>140</x>
+         <y>140</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -18875,8 +19209,8 @@ color: white;</string>
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>320</y>
-        <width>371</width>
+        <y>250</y>
+        <width>231</width>
         <height>191</height>
        </rect>
       </property>
@@ -19089,8 +19423,8 @@ color: white;</string>
       <widget class="QLabel" name="labelMidtownMadnessSwitchOff">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>60</y>
+         <x>60</x>
+         <y>140</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -19102,8 +19436,8 @@ color: white;</string>
       <widget class="QLabel" name="labelMidtownMadnessSwitchOn">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>60</y>
+         <x>140</x>
+         <y>140</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -19115,8 +19449,8 @@ color: white;</string>
       <widget class="QSlider" name="horizontalSliderMidtownMadnessSwitch">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>80</y>
+         <x>70</x>
+         <y>160</y>
          <width>81</width>
          <height>16</height>
         </rect>
@@ -19131,14 +19465,37 @@ color: white;</string>
         <enum>Qt::Orientation::Horizontal</enum>
        </property>
       </widget>
+      <widget class="QPushButton" name="pushButtonMidtownMadness">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>201</width>
+         <height>91</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/images/MidtownMadness</normaloff>:/images/MidtownMadness</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>200</width>
+         <height>200</height>
+        </size>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBoxArmorIncursion">
       <property name="geometry">
        <rect>
-        <x>410</x>
+        <x>270</x>
         <y>40</y>
-        <width>371</width>
-        <height>241</height>
+        <width>231</width>
+        <height>191</height>
        </rect>
       </property>
       <property name="palette">
@@ -19350,8 +19707,8 @@ color: white;</string>
       <widget class="QLabel" name="labelArmorIncursionSwitchOff">
        <property name="geometry">
         <rect>
-         <x>130</x>
-         <y>200</y>
+         <x>60</x>
+         <y>140</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -19363,8 +19720,8 @@ color: white;</string>
       <widget class="QLabel" name="labelArmorIncursionSwitchOn">
        <property name="geometry">
         <rect>
-         <x>210</x>
-         <y>200</y>
+         <x>140</x>
+         <y>140</y>
          <width>41</width>
          <height>16</height>
         </rect>
@@ -19376,8 +19733,8 @@ color: white;</string>
       <widget class="QSlider" name="horizontalSliderArmorIncursionSwitch">
        <property name="geometry">
         <rect>
-         <x>140</x>
-         <y>220</y>
+         <x>70</x>
+         <y>160</y>
          <width>81</width>
          <height>16</height>
         </rect>
@@ -19395,7 +19752,7 @@ color: white;</string>
       <widget class="QPushButton" name="pushButtonArmorIncursion">
        <property name="geometry">
         <rect>
-         <x>80</x>
+         <x>10</x>
          <y>20</y>
          <width>201</width>
          <height>91</height>
@@ -19415,17 +19772,288 @@ color: white;</string>
         </size>
        </property>
       </widget>
-      <widget class="QLabel" name="labelArmorIncursion">
+     </widget>
+     <widget class="QGroupBox" name="groupBoxOdinsBounty">
+      <property name="geometry">
+       <rect>
+        <x>270</x>
+        <y>250</y>
+        <width>231</width>
+        <height>191</height>
+       </rect>
+      </property>
+      <property name="palette">
+       <palette>
+        <active>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ButtonText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="PlaceholderText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="128">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </active>
+        <inactive>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ButtonText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="PlaceholderText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="128">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </inactive>
+        <disabled>
+         <colorrole role="WindowText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Button">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Text">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="ButtonText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="255">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Base">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="Window">
+          <brush brushstyle="SolidPattern">
+           <color alpha="0">
+            <red>0</red>
+            <green>0</green>
+            <blue>0</blue>
+           </color>
+          </brush>
+         </colorrole>
+         <colorrole role="PlaceholderText">
+          <brush brushstyle="SolidPattern">
+           <color alpha="128">
+            <red>255</red>
+            <green>255</green>
+            <blue>255</blue>
+           </color>
+          </brush>
+         </colorrole>
+        </disabled>
+       </palette>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">background: transparent;
+color: white;</string>
+      </property>
+      <property name="title">
+       <string>Odin's Bounty</string>
+      </property>
+      <widget class="QLabel" name="labelOdinsBountyOff">
        <property name="geometry">
         <rect>
-         <x>0</x>
-         <y>92</y>
-         <width>371</width>
-         <height>111</height>
+         <x>60</x>
+         <y>140</y>
+         <width>41</width>
+         <height>16</height>
         </rect>
        </property>
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;This is the A.R.M.O.R. Incursion Event!&lt;/span&gt;&lt;br/&gt;During the A.R.M.O.R. Incursion event a 100% XP bonus is active!&lt;/p&gt;&lt;p align=&quot;center&quot;&gt;This bonus is applied server-side and is further multiplied&lt;br/&gt;by other XP boosts you may have active.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>Off</string>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelOdinsBountyOn">
+       <property name="geometry">
+        <rect>
+         <x>140</x>
+         <y>140</y>
+         <width>41</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>On</string>
+       </property>
+      </widget>
+      <widget class="QSlider" name="horizontalSliderOdinsBountySwitch">
+       <property name="geometry">
+        <rect>
+         <x>70</x>
+         <y>160</y>
+         <width>81</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="maximum">
+        <number>1</number>
+       </property>
+       <property name="pageStep">
+        <number>1</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Orientation::Horizontal</enum>
+       </property>
+      </widget>
+      <widget class="QPushButton" name="pushButtonOdinsBounty">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>20</y>
+         <width>201</width>
+         <height>91</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="resources.qrc">
+         <normaloff>:/images/OdinsBounty</normaloff>:/images/OdinsBounty</iconset>
+       </property>
+       <property name="iconSize">
+        <size>
+         <width>200</width>
+         <height>200</height>
+        </size>
        </property>
       </widget>
      </widget>

@@ -7,5 +7,7 @@
         <file alias="off">off.png</file>
         <file alias="CosmicChaos">EventCosmicChaos.jpg</file>
         <file alias="ArmorIncursion">armorEvent.jpg</file>
+        <file alias="OdinsBounty">EventOdinsBounty.jpg</file>
+        <file alias="MidtownMadness">EventMidtownMadness.jpg</file>
     </qresource>
 </RCC>
