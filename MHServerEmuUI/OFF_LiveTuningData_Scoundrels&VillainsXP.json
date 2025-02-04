@@ -1,0 +1,47 @@
+[
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Carnage.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/DrDoom.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Elektra.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/GreenGoblin.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Juggernaut.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Magneto.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Taskmaster.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Ultron.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/WinterSoldier.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    }
+]

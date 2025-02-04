@@ -36,6 +36,7 @@ private slots:
     void stopServer();
     void readServerOutput();
     void handleServerError();
+    void openAccountCreationPage();
     void onLoadLiveTuning();       // Load Live Tuning values
     void onSaveLiveTuning();       // Save Live Tuning values
     void onReloadLiveTuning();     // Reload command for server
@@ -44,16 +45,12 @@ private slots:
     void onPushButtonAddLTSettingClicked();
     void onPushButtonLoadConfigClicked();
     void onPushButtonSaveConfigClicked();
-    void onUpdateLevelButtonClicked();
-    void onPushButtonBanClicked();
     void onPushButtonUnBanClicked();
-    void onKickButtonClicked();
     void onServerPathEditUpdated();
     void onPushButtonSendToServerClicked();
-    void onCosmicChaosSwitchChanged(int value);
-    void onMidtownMadnessSwitchChanged(int value);
-    void onArmorIncursionSwitchChanged(int value);
-    void onOdinsBountySwitchChanged(int value);
+    void onEventSwitchChanged(const QString &eventName, int value);
+    void onCustomEventSwitchChanged(int eventIndex, int value);
+    void verifyAndCopyEventFiles();
     void showUserContextMenu(const QPoint &pos); // Show context menu on right-click
     void kickUser();                            // Kick the selected user
     void banUser();                             // Ban the selected user
@@ -83,8 +80,11 @@ private:
     void addUserToList(const QString &username, const QString &sessionId);
     void removeUserFromList(const QString &sessionId);
     void removeUserFromLoggedInMap(const QString &sessionId);
-    void sendClientInfoCommand(const QString &sessionId);
-    void displayUserInfo(const QString &info); // For displaying info
+    void sendClientInfoCommand(const QString &sessionId, const QString &username, const QString &email);
+    void displayUserInfo(const QString &info, const QString &username, const QString &email);
+    void showUpdateLevelDialog(const QString &username);
+    QString getEmailFromDatabase(const QString &username);
+    QMap<QString, QPair<QString, QString>> userInfoMap;
 };
 
 #endif // MAINWINDOW_H

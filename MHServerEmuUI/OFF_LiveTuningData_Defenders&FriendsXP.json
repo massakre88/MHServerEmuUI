@@ -1,0 +1,22 @@
+[
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Daredevil.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 2.0
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/IronFist.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 2.0
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/LukeCage.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 2.0
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Punisher.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 2.0
+    }
+]

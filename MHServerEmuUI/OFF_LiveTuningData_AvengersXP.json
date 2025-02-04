@@ -1,0 +1,57 @@
+[
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/AntMan.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/BlackPanther.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/BlackWidow.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/CaptainAmerica.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/DoctorStrange.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Hawkeye.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Hulk.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/IronMan.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Thor.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/MsMarvel.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Spiderman.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    }
+]

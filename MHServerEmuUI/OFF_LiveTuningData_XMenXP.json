@@ -1,0 +1,87 @@
+[
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Beast.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Cable.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Colossus.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Cyclops.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/EmmaFrost.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Gambit.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Iceman.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/JeanGrey.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/KittyPryde.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Magik.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Nightcrawler.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Psylocke.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Rogue.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/ScarletWitch.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Storm.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/Wolverine.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/X23.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    }
+]

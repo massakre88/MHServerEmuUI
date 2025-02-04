@@ -1,0 +1,22 @@
+[
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/HumanTorch.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/InvisibleWoman.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+	{
+        "Prototype": "Entity/Characters/Avatars/Shipping/MrFantastic.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    },
+    {
+        "Prototype": "Entity/Characters/Avatars/Shipping/Thing.prototype",
+        "Setting": "eAETV_BonusXPPct",
+        "Value": 1.50
+    }
+]

@@ -4,6 +4,8 @@
 #include <QDir>
 #include <QSettings>
 #include <QProcess>
+#include <QDesktopServices>
+#include <QUrl>
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -17,6 +19,9 @@
 #include <QJsonArray>
 #include <QTimer>
 #include <QInputDialog>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -74,6 +79,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Initialize event states based on LiveTuningData.json
     initializeEventStates();
+    verifyAndCopyEventFiles();
 
     connect(ui->pushButtonShutdown, &QPushButton::clicked, this, &MainWindow::onPushButtonShutdownClicked);
     connect(ui->loadLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onLoadLiveTuning);
@@ -87,21 +93,53 @@ MainWindow::MainWindow(QWidget *parent)
     connect(serverProcess, &QProcess::readyReadStandardOutput, this, &MainWindow::readServerOutput);
     connect(serverProcess, &QProcess::readyReadStandardError, this, &MainWindow::readServerOutput);
     connect(serverProcess, &QProcess::errorOccurred, this, &MainWindow::handleServerError);
+    connect(ui->createAccountButton, &QPushButton::clicked, this, &MainWindow::openAccountCreationPage);
     connect(ui->comboBoxCategory, &QComboBox::currentTextChanged, this, &MainWindow::onCategoryChanged);
     connect(ui->pushButtonAddLTsetting, &QPushButton::clicked, this, &MainWindow::onPushButtonAddLTSettingClicked);
     connect(ui->pushButtonLoadConfig, &QPushButton::clicked, this, &MainWindow::onPushButtonLoadConfigClicked);
     connect(ui->pushButtonSaveConfig, &QPushButton::clicked, this, &MainWindow::onPushButtonSaveConfigClicked);
-    connect(ui->updateLevelButton, &QPushButton::clicked, this, &MainWindow::onUpdateLevelButtonClicked);
-    connect(ui->pushButtonBan, &QPushButton::clicked, this, &MainWindow::onPushButtonBanClicked);
     connect(ui->pushButtonUnBan, &QPushButton::clicked, this, &MainWindow::onPushButtonUnBanClicked);
-    connect(ui->KickButton, &QPushButton::clicked, this, &MainWindow::onKickButtonClicked);
     connect(ui->mhServerPathEdit, &QLineEdit::editingFinished, this, &MainWindow::onServerPathEditUpdated);
     connect(ui->pushButtonSendToServer, &QPushButton::clicked, this, &MainWindow::onPushButtonSendToServerClicked);
-    connect(ui->horizontalSliderCosmicChaosSwitch, &QSlider::valueChanged, this, &MainWindow::onCosmicChaosSwitchChanged);
-    connect(ui->horizontalSliderMidtownMadnessSwitch, &QSlider::valueChanged, this, &MainWindow::onMidtownMadnessSwitchChanged);
-    connect(ui->horizontalSliderArmorIncursionSwitch, &QSlider::valueChanged, this, &MainWindow::onArmorIncursionSwitchChanged);
-    connect(ui->horizontalSliderOdinsBountySwitch, &QSlider::valueChanged, this, &MainWindow::onOdinsBountySwitchChanged);
+    connect(ui->horizontalSliderCosmicChaosSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("CosmicChaos", value);
+    });
+    connect(ui->horizontalSliderMidtownMadnessSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("MidtownMadness", value);
+    });
+    connect(ui->horizontalSliderArmorIncursionSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("ArmorIncursion", value);
+    });
+    connect(ui->horizontalSliderOdinsBountySwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("OdinsBounty", value);
+    });
+    connect(ui->horizontalSliderDefendersXPSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("Defenders&FriendsXP", value);
+    });
+    connect(ui->horizontalSliderAvengersXPSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("AvengersXP", value);
+    });
+    connect(ui->horizontalSliderFantastic4XPSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("FantasticFourXP", value);
+    });
+    connect(ui->horizontalSliderGuardiansXPSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("Guardians&CosmicXP", value);
+    });
+    connect(ui->horizontalSliderScoundrelsXPSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("Scoundrels&VillainsXP", value);
+    });
+    connect(ui->horizontalSliderXmenXPSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onEventSwitchChanged("XMenXP", value);
+    });
     connect(ui->pushButtonRefreshUsers, &QPushButton::clicked, this, &MainWindow::refreshLoggedInUsers);
+    for (int i = 1; i <= 6; ++i) {
+        QSlider *eventSwitch = findChild<QSlider *>(QString("horizontalSliderCustom%1Switch").arg(i));
+        if (eventSwitch) {
+            connect(eventSwitch, &QSlider::valueChanged, this, [this, i](int value) {
+                onCustomEventSwitchChanged(i, value);
+            });
+        }
+    }
 }
 
 MainWindow::~MainWindow() {
@@ -315,6 +353,13 @@ void MainWindow::onPushButtonShutdownClicked() {
     ui->ServerOutputEdit->append(QString("Shutdown countdown started. Server will shut down in %1 minutes.").arg(shutdownTime));
 }
 
+void MainWindow::openAccountCreationPage() {
+    QUrl url("http://localhost:8080/AccountManagement/Create");
+    if (!QDesktopServices::openUrl(url)) {
+        QMessageBox::warning(this, "Error", "Failed to open the web browser. Please check your default browser settings.");
+    }
+}
+
 void MainWindow::readServerOutput() {
     static bool isProcessingClientInfo = false;
     static QString clientInfoBuffer;
@@ -336,7 +381,10 @@ void MainWindow::readServerOutput() {
 
     QStringList lines = outputText.split('\n', Qt::SkipEmptyParts);
 
-    for (const QString &line : lines) {
+    // ✅ Use indexed access instead of a range-based for-loop to avoid detachment
+    for (int i = 0; i < lines.size(); ++i) {
+        const QString &line = lines.at(i);  // Direct access, prevents detachment
+
         // Check for the start of client info
         if (line.contains("SessionId:") && !isProcessingClientInfo) {
             isProcessingClientInfo = true;
@@ -347,11 +395,31 @@ void MainWindow::readServerOutput() {
         if (isProcessingClientInfo) {
             clientInfoBuffer.append(line + '\n');
 
-            // Detect the end of the client info block (e.g., an empty line or the next unrelated log entry)
-            if (!line.contains(":")) { // A heuristic to detect unrelated lines
+            // Detect the end of the client info block
+            if (!line.contains(":")) { // End of client info block
                 isProcessingClientInfo = false;
-                displayUserInfo(clientInfoBuffer.trimmed());
+
+                // Extract the SessionId from the buffer
+                static const QRegularExpression regex(R"(SessionId:\s*(\S+))");
+                QRegularExpressionMatch match = regex.match(clientInfoBuffer);
+
+                QString sessionId;
+                if (match.hasMatch()) {
+                    sessionId = match.captured(1).trimmed();
+                }
+
+                // Retrieve username and email from the map
+                QString username, email;
+                if (userInfoMap.contains(sessionId)) {
+                    username = userInfoMap[sessionId].first;
+                    email = userInfoMap[sessionId].second;
+                    userInfoMap.remove(sessionId); // Cleanup after use
+                }
+
+                // Call displayUserInfo with complete context
+                displayUserInfo(clientInfoBuffer.trimmed(), username, email);
                 qDebug() << "User info block processed:\n" << clientInfoBuffer;
+
                 clientInfoBuffer.clear();
             }
         }
@@ -364,7 +432,7 @@ void MainWindow::readServerOutput() {
     }
     // Check for player disconnection logs
     else if (outputText.contains("[PlayerConnectionManager] Removed client")) {
-        QRegularExpression regex(R"(\[Account=(.+) \(.*?\), SessionId=(0x[0-9A-Fa-f]+)\])");
+        static const QRegularExpression regex(R"(\[Account=(.+) \(.*?\), SessionId=(0x[0-9A-Fa-f]+)\])");
         QRegularExpressionMatch match = regex.match(outputText);
         if (match.hasMatch()) {
             QString username = match.captured(1).trimmed();
@@ -409,7 +477,7 @@ void MainWindow::onStartClientButtonClicked() {
 }
 
 void MainWindow::parseLoginEvent(const QString &logLine) {
-    QRegularExpression regex(R"(\[Account=(.+) \(0x[0-9A-Fa-f]+\), SessionId=(0x[0-9A-Fa-f]+)\])");
+    static const QRegularExpression regex(R"(\[Account=(.+) \(0x[0-9A-Fa-f]+\), SessionId=(0x[0-9A-Fa-f]+)\])");
     QRegularExpressionMatch match = regex.match(logLine);
 
     if (match.hasMatch()) {
@@ -470,7 +538,7 @@ void MainWindow::onUpdateButtonClicked() {
 
     QString currentDate = nightlyDate.toString("yyyyMMdd");
     QString downloadUrl = QString("https://nightly.link/Crypto137/MHServerEmu/workflows/nightly-release-windows-x64/master/MHServerEmu-nightly-%1-Release-windows-x64.zip").arg(currentDate);
-
+    qDebug() << "Generated download URL: " << downloadUrl;
     QString serverPath = ui->mhServerPathEdit->text();
     if (serverPath.isEmpty()) {
         QMessageBox::warning(this, "Error", "Server path is empty. Set the path first.");
@@ -594,6 +662,63 @@ void MainWindow::onDownloadFinished(QNetworkReply *reply) {
     reply->deleteLater();
 }
 
+void MainWindow::verifyAndCopyEventFiles() {
+    // Define the server's LiveTuning folder
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+
+    // Define the source folder (where the program's EXE is located)
+    QString sourcePath = QCoreApplication::applicationDirPath() + "/";
+
+    // List of event file names
+    QStringList eventFiles = {
+        "LiveTuningData_CosmicChaos.json",
+        "OFF_LiveTuningData_CosmicChaos.json",
+        "LiveTuningData_MidtownMadness.json",
+        "OFF_LiveTuningData_MidtownMadness.json",
+        "LiveTuningData_ArmorIncursion.json",
+        "OFF_LiveTuningData_ArmorIncursion.json",
+        "LiveTuningData_OdinsBounty.json",
+        "OFF_LiveTuningData_OdinsBounty.json",
+        "LiveTuningData_Defenders&FriendsXP.json",
+        "OFF_LiveTuningData_Defenders&FriendsXP.json",
+        "LiveTuningData_AvengersXP.json",
+        "OFF_LiveTuningData_AvengersXP.json",
+        "LiveTuningData_FantasticFourXP.json",
+        "OFF_LiveTuningData_FantasticFourXP.json",
+        "LiveTuningData_Guardians&CosmicXP.json",
+        "OFF_LiveTuningData_Guardians&CosmicXP.json",
+        "LiveTuningData_Scoundrels&VillainsXP.json",
+        "OFF_LiveTuningData_Scoundrels&VillainsXP.json",
+        "LiveTuningData_XMenXP.json",
+        "OFF_LiveTuningData_XMenXP.json"
+    };
+
+    // Ensure the server folder exists
+    QDir serverDir(serverPath);
+    if (!serverDir.exists()) {
+        QMessageBox::critical(this, "Error", "Server folder not found. Please check the server path.");
+        return;
+    }
+
+    // Copy missing event files
+    for (const QString &fileName : eventFiles) {
+        QString destFilePath = serverPath + fileName;
+        QString sourceFilePath = sourcePath + fileName;
+
+        if (!QFile::exists(destFilePath)) {
+            if (QFile::exists(sourceFilePath)) {
+                if (QFile::copy(sourceFilePath, destFilePath)) {
+                    qDebug() << "Copied missing event file:" << fileName;
+                } else {
+                    qDebug() << "Failed to copy:" << fileName;
+                }
+            } else {
+                qDebug() << "Source event file missing:" << sourceFilePath;
+            }
+        }
+    }
+}
+
 void MainWindow::onLoadLiveTuning()
 {
     // Retrieve path from the line edit
@@ -641,7 +766,11 @@ void MainWindow::onLoadLiveTuning()
 
     // Categorize items dynamically
     categories.clear();  // Reset the categories
-    for (const QJsonValue &value : jsonArray) {
+
+    // ✅ Use indexed access instead of a range-based for-loop to avoid detachment
+    for (int i = 0; i < jsonArray.size(); ++i) {
+        QJsonValue value = jsonArray.at(i);
+
         if (!value.isObject()) {
             qDebug() << "Skipping non-object JSON entry:" << value;
             continue;
@@ -667,8 +796,9 @@ void MainWindow::onLoadLiveTuning()
 void MainWindow::populateComboBox()
 {
     ui->comboBoxCategory->clear();  // Clear any existing items
-    for (const QString &category : categories.keys()) {
-        ui->comboBoxCategory->addItem(category);
+
+    for (auto it = categories.constBegin(); it != categories.constEnd(); ++it) {
+        ui->comboBoxCategory->addItem(it.key());
     }
 
     if (!categories.isEmpty()) {
@@ -716,12 +846,12 @@ void MainWindow::displayCategoryItems(const QString &category)
         lineEdit->setAlignment(Qt::AlignCenter);
 
         // Sync slider and line edit
-        connect(slider, &QSlider::valueChanged, [lineEdit](int sliderValue) {
+        connect(slider, &QSlider::valueChanged, this, [lineEdit](int sliderValue) {
             double scaledValue = sliderValue / 10.0;
             lineEdit->setText(QString::number(scaledValue, 'f', 1));
         });
 
-        connect(lineEdit, &QLineEdit::editingFinished, [slider, lineEdit]() {
+        connect(lineEdit, &QLineEdit::editingFinished, this, [slider, lineEdit]() {
             double enteredValue = lineEdit->text().toDouble();
             slider->setValue(static_cast<int>(enteredValue * 10));
         });
@@ -773,12 +903,12 @@ void MainWindow::createLiveTuningSliders(const QJsonArray &data) {
         slider->setValue(static_cast<int>(val * 10));
         QLineEdit *lineEdit = new QLineEdit(QString::number(val, 'f', 1), this);
 
-        connect(slider, &QSlider::valueChanged, [lineEdit](int sliderValue) {
+        connect(slider, &QSlider::valueChanged, this, [lineEdit](int sliderValue) {
             double scaledValue = sliderValue / 10.0;
             lineEdit->setText(QString::number(scaledValue, 'f', 1));
         });
 
-        connect(lineEdit, &QLineEdit::editingFinished, [slider, lineEdit]() {
+        connect(lineEdit, &QLineEdit::editingFinished, this, [slider, lineEdit]() {
             double enteredValue = lineEdit->text().toDouble();
             slider->setValue(static_cast<int>(enteredValue * 10));
         });
@@ -1080,7 +1210,6 @@ void MainWindow::onPushButtonSaveConfigClicked() {
 
     // Map settings dynamically from UI
     QMap<QString, QString> updatedSettings = {
-        // Logging settings
         {"Logging/EnableLogging", ui->checkBoxEnableLogging->isChecked() ? "true" : "false"},
         {"Logging/SynchronousMode", ui->checkBoxSynchronousMode->isChecked() ? "true" : "false"},
         {"Logging/HideSensitiveInformation", ui->checkBoxHideSensitiveInformation->isChecked() ? "true" : "false"},
@@ -1093,116 +1222,45 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Logging/FileMaxLevel", QString::number(ui->comboBoxFileMaxLevel->currentIndex())},
         {"Logging/FileChannels", ui->lineEditFileChannels->text()},
         {"Logging/FileSplitOutput", ui->checkBoxFileSplitOutput->isChecked() ? "true" : "false"},
-
-        // Frontend settings
         {"Frontend/BindIP", ui->lineEditBindIP->text()},
         {"Frontend/Port", ui->lineEditPort->text()},
         {"Frontend/PublicAddress", ui->lineEditPublicAddress->text()},
         {"Frontend/ReceiveTimeoutMS", ui->lineEditReceiveTimeoutMS->text()},
         {"Frontend/SendTimeoutMS", ui->lineEditSendTimeoutMS->text()},
-
-        // Auth settings
         {"Auth/Address", ui->lineEditAuthAddress->text()},
         {"Auth/Port", ui->lineEditAuthPort->text()},
-        {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
-
-        // PlayerManager settings
-        {"PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked() ? "true" : "false"},
-        {"PlayerManager/IgnoreSessionToken", ui->checkBoxIgnoreSessionToken->isChecked() ? "true" : "false"},
-        {"PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked() ? "true" : "false"},
-        {"PlayerManager/SimulateQueue", ui->checkBoxSimulateQueue->isChecked() ? "true" : "false"},
-        {"PlayerManager/QueuePlaceInLine", ui->lineEditQueuePlaceInLine->text()},
-        {"PlayerManager/QueueNumberOfPlayersInLine", ui->lineEditQueueNumberOfPlayersInLine->text()},
-        {"PlayerManager/ShowNewsOnLogin", ui->checkBoxShowNewsOnLogin->isChecked() ? "true" : "false"},
-        {"PlayerManager/NewsUrl", ui->lineEditNewsUrl->text()},
-
-        // SQLiteDBManager settings
-        {"SQLiteDBManager/FileName", ui->lineEditSQLiteFileName->text()},
-        {"SQLiteDBManager/MaxBackupNumber", ui->lineEditSQLiteMaxBackupNumber->text()},
-        {"SQLiteDBManager/BackupIntervalMinutes", ui->lineEditSQLiteBackupIntervalMinutes->text()},
-
-        // JsonDBManager settings
-        {"JsonDBManager/FileName", ui->lineEditJsonFileName->text()},
-        {"JsonDBManager/MaxBackupNumber", ui->lineEditJsonMaxBackupNumber->text()},
-        {"JsonDBManager/BackupIntervalMinutes", ui->lineEditJsonBackupIntervalMinutes->text()},
-        {"JsonDBManager/PlayerName", ui->lineEditJsonPlayerName->text()},
-
-        // GroupingManager settings
-        {"GroupingManager/MotdPlayerName", ui->lineEditMotdPlayerName->text()},
-        {"GroupingManager/MotdText", ui->textEditMotdText->toPlainText()},
-        {"GroupingManager/MotdPrestigeLevel", QString::number(ui->comboBoxMotdPrestigeLevel->currentIndex())},
-
-        // GameData settings
-        {"GameData/LoadAllPrototypes", ui->checkBoxLoadAllPrototypes->isChecked() ? "true" : "false"},
-        {"GameData/UseEquipmentSlotTableCache", ui->checkBoxUseEquipmentSlotTableCache->isChecked() ? "true" : "false"},
-
-        // GameOptions settings
-        {"GameOptions/TeamUpSystemEnabled", ui->checkBoxTeamUpSystemEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/AchievementsEnabled", ui->checkBoxAchievementsEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/OmegaMissionsEnabled", ui->checkBoxOmegaMissionsEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/VeteranRewardsEnabled", ui->checkBoxVeteranRewardsEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/MultiSpecRewardsEnabled", ui->checkBoxMultiSpecRewardsEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/GiftingEnabled", ui->checkBoxGiftingEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/CharacterSelectV2Enabled", ui->checkBoxCharacterSelectV2Enabled->isChecked() ? "true" : "false"},
-        {"GameOptions/CommunityNewsV2Enabled", ui->checkBoxCommunityNewsV2Enabled->isChecked() ? "true" : "false"},
-        {"GameOptions/LeaderboardsEnabled", ui->checkBoxLeaderboardsEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/NewPlayerExperienceEnabled", ui->checkBoxNewPlayerExperienceEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/MissionTrackerV2Enabled", ui->checkBoxMissionTrackerV2Enabled->isChecked() ? "true" : "false"},
-        {"GameOptions/GiftingAccountAgeInDaysRequired", ui->lineEditGiftingAccountAgeInDaysRequired->text()},
-        {"GameOptions/GiftingAvatarLevelRequired", ui->lineEditGiftingAvatarLevelRequired->text()},
-        {"GameOptions/GiftingLoginCountRequired", ui->lineEditGiftingLoginCountRequired->text()},
-        {"GameOptions/InfinitySystemEnabled", ui->checkBoxInfinitySystemEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/ChatBanVoteAccountAgeInDaysRequired", ui->lineEditChatBanVoteAccountAgeInDaysRequired->text()},
-        {"GameOptions/ChatBanVoteAvatarLevelRequired", ui->lineEditChatBanVoteAvatarLevelRequired->text()},
-        {"GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked() ? "true" : "false"},
-        {"GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked() ? "true" : "false"},
-
-        // CustomGameOptions settings
-        {"CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text()},
-        {"CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text()},
-        {"CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked() ? "true" : "false"},
-        {"CustomGameOptions/DisableInstancedLoot", ui->checkBoxDisableInstancedLoot->isChecked() ? "true" : "false"},
-        {"CustomGameOptions/LootSpawnGridCellRadius", ui->lineEditLootSpawnGridCellRadius->text()},
-
-        // Billing settings
-        {"Billing/CurrencyBalance", ui->lineEditCurrencyBalance->text()},
-        {"Billing/ApplyCatalogPatch", ui->checkBoxApplyCatalogPatch->isChecked() ? "true" : "false"},
-        {"Billing/OverrideStoreUrls", ui->checkBoxOverrideStoreUrls->isChecked() ? "true" : "false"},
-        {"Billing/StoreHomePageUrl", ui->lineEditStoreHomePageUrl->text()},
-        {"Billing/StoreHomeBannerPageUrl", ui->lineEditStoreHomeBannerPageUrl->text()},
-        {"Billing/StoreHeroesBannerPageUrl", ui->lineEditStoreHeroesBannerPageUrl->text()},
-        {"Billing/StoreCostumesBannerPageUrl", ui->lineEditStoreCostumesBannerPageUrl->text()},
-        {"Billing/StoreBoostsBannerPageUrl", ui->lineEditStoreBoostsBannerPageUrl->text()},
-        {"Billing/StoreChestsBannerPageUrl", ui->lineEditStoreChestsBannerPageUrl->text()},
-        {"Billing/StoreSpecialsBannerPageUrl", ui->lineEditStoreSpecialsBannerPageUrl->text()},
-        {"Billing/StoreRealMoneyUrl", ui->lineEditStoreRealMoneyUrl->text()}
+        {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"}
     };
 
     // Modify the settings in the existing lines while keeping comments
-    QString currentSection; // Track the current section
-    for (int i = 0; i < lines.size(); ++i) {
-        QString line = lines[i].trimmed();
+    QString currentSection;
 
-        // Skip empty lines and comments
+    // ✅ Use indexed access to avoid detachment
+    for (int i = 0; i < lines.size(); ++i) {
+        QString line = lines.at(i).trimmed();
+
         if (line.isEmpty() || line.startsWith(';')) {
             continue;
         }
 
         // Check if the line defines a section
         if (line.startsWith('[') && line.endsWith(']')) {
-            currentSection = line.mid(1, line.length() - 2); // Extract section name
+            currentSection = line.mid(1, line.length() - 2);
             continue;
         }
 
-        // Process lines containing '=' within a section
+        // Process key-value pairs within a section
         if (line.contains('=') && !currentSection.isEmpty()) {
-            QString key = currentSection + '/' + line.section('=', 0, 0).trimmed(); // Combine section and key
+            QString key = currentSection + '/' + line.section('=', 0, 0).trimmed();
             if (updatedSettings.contains(key)) {
                 qDebug() << "Updating key:" << key
                          << "Old Value:" << line.section('=', 1).trimmed()
                          << "New Value:" << updatedSettings[key];
-                lines[i] = QString("%1=%2").arg(line.section('=', 0, 0).trimmed()).arg(updatedSettings[key]); // Update the value
-                updatedSettings.remove(key); // Remove the updated key from the map
+
+                // ✅ Fix: Use multi-arg `QString::arg` instead of chaining
+                lines[i] = QString("%1=%2").arg(line.section('=', 0, 0).trimmed(), updatedSettings[key]);
+
+                updatedSettings.remove(key);
             }
         }
     }
@@ -1214,49 +1272,14 @@ void MainWindow::onPushButtonSaveConfigClicked() {
     }
 
     QTextStream out(&file);
-    for (const QString &line : lines) {
-        out << line << '\n';
+
+    // ✅ Use indexed access to prevent detachment
+    for (int i = 0; i < lines.size(); ++i) {
+        out << lines.at(i) << '\n';
     }
+
     file.close();
-
     QMessageBox::information(this, "Success", "Configuration saved successfully.");
-}
-
-void MainWindow::onUpdateLevelButtonClicked() {
-    if (serverProcess->state() != QProcess::Running) {
-        QMessageBox::warning(this, "Error", "Server is not running. Start the server first.");
-        return;
-    }
-
-    QString accountName = ui->accountNameEdit->text().trimmed();
-    QString accountLevel = ui->accountLevelComboBox->currentText();
-
-    if (accountName.isEmpty() || accountLevel.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Account name or level cannot be empty.");
-        return;
-    }
-
-    QString command = QString("!account userlevel %1 %2\n").arg(accountName, accountLevel);
-    serverProcess->write(command.toUtf8());
-    ui->ServerOutputEdit->append(QString("Sent command: %1").arg(command)); // Optional feedback
-}
-
-void MainWindow::onPushButtonBanClicked() {
-    if (serverProcess->state() != QProcess::Running) {
-        QMessageBox::warning(this, "Error", "Server is not running. Start the server first.");
-        return;
-    }
-
-    QString accountName = ui->accountNameBan->text().trimmed();
-
-    if (accountName.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Account name cannot be empty.");
-        return;
-    }
-
-    QString command = QString("!account ban %1\n").arg(accountName);
-    serverProcess->write(command.toUtf8());
-    ui->ServerOutputEdit->append(QString("Sent command: %1").arg(command)); // Optional feedback
 }
 
 void MainWindow::onPushButtonUnBanClicked() {
@@ -1273,23 +1296,6 @@ void MainWindow::onPushButtonUnBanClicked() {
     }
 
     QString command = QString("!account unban %1\n").arg(accountName);
-    serverProcess->write(command.toUtf8());
-    ui->ServerOutputEdit->append(QString("Sent command: %1").arg(command)); // Optional feedback
-}
-void MainWindow::onKickButtonClicked() {
-    if (serverProcess->state() != QProcess::Running) {
-        QMessageBox::warning(this, "Error", "Server is not running. Start the server first.");
-        return;
-    }
-
-    QString playerName = ui->accountKick->text().trimmed();
-
-    if (playerName.isEmpty()) {
-        QMessageBox::warning(this, "Error", "Player name cannot be empty.");
-        return;
-    }
-
-    QString command = QString("!client kick %1\n").arg(playerName);
     serverProcess->write(command.toUtf8());
     ui->ServerOutputEdit->append(QString("Sent command: %1").arg(command)); // Optional feedback
 }
@@ -1364,89 +1370,45 @@ void MainWindow::initializeEventStates() {
     ui->horizontalSliderOdinsBountySwitch->blockSignals(false);
 }
 
-void MainWindow::onCosmicChaosSwitchChanged(int value) {
-    // Save the state
+void MainWindow::onEventSwitchChanged(const QString &eventName, int value) {
+    // Save the state using QSettings
     QSettings settings("PTM", "MHServerEmuUI");
-    settings.setValue("CosmicChaosEvent", value);
+    settings.setValue(eventName + "Event", value);
 
-    // Update the livetuningdata.json file and perform other tasks (existing logic)
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+    // Define the file paths
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString activeFilePath = serverPath + "LiveTuningData_" + eventName + ".json";
+    QString inactiveFilePath = serverPath + "OFF_LiveTuningData_" + eventName + ".json";
 
-    if (!QFile::exists(filePath)) {
-        qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
-        return;
-    }
+    QFile activeFile(activeFilePath);
+    QFile inactiveFile(inactiveFilePath);
 
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
-        return;
-    }
-
-    QByteArray jsonData = file.readAll();
-    file.close();
-
-    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-    if (doc.isNull() || !doc.isArray()) {
-        qDebug() << "Invalid JSON structure.";
-        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
-        return;
-    }
-
-    QJsonArray dataArray = doc.array();
-    bool updated = false;
-
-    // Update Cosmic Chaos Event values (existing logic)
-    double adjustment = (value == 1) ? 0.42 : -0.42;
-    QStringList targetSettings = {
-        "eGTV_XPGain",
-        "eGTV_LootRarity",
-        "eGTV_LootSpecialDropRate",
-        "eGTV_PartyXPBonusPct",
-        "eGTV_CosmicPrestigeXPPct"
-    };
-
-    for (int i = 0; i < dataArray.size(); ++i) {
-        QJsonObject obj = dataArray[i].toObject();
-
-        if (obj["Prototype"].toString().contains("CosmicChaosEvent", Qt::CaseInsensitive)) {
-            if (obj.contains("Value")) {
-                obj["Value"] = (value == 1) ? 2.0 : 0.0;
-                dataArray[i] = obj;
-                updated = true;
-            }
+    if (value == 1) {
+        // Enabling event
+        if (!inactiveFile.exists()) {
+            QMessageBox::warning(this, "Error", QString("Inactive file not found: %1").arg(inactiveFilePath));
+            return;
         }
-
-        if (targetSettings.contains(obj["Setting"].toString())) {
-            if (obj.contains("Value")) {
-                double currentValue = obj["Value"].toDouble();
-                obj["Value"] = currentValue + adjustment;
-                dataArray[i] = obj;
-                qDebug() << QString("Adjusted %1 to %2").arg(obj["Setting"].toString()).arg(obj["Value"].toDouble());
-            }
+        if (!inactiveFile.rename(activeFilePath)) {
+            QMessageBox::critical(this, "Error", QString("Failed to enable the event: %1").arg(inactiveFile.errorString()));
+            return;
+        }
+    } else {
+        // Disabling event
+        if (!activeFile.exists()) {
+            QMessageBox::warning(this, "Error", QString("Active file not found: %1").arg(activeFilePath));
+            return;
+        }
+        if (!activeFile.rename(inactiveFilePath)) {
+            QMessageBox::critical(this, "Error", QString("Failed to disable the event: %1").arg(activeFile.errorString()));
+            return;
         }
     }
 
-    if (!updated) {
-        QMessageBox::warning(this, "Warning", "No entries for 'Cosmic Chaos Event' found in the JSON file.");
-        return;
-    }
-
-    // Save the modified JSON
-    doc.setArray(dataArray);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        return;
-    }
-
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
-
-    // Notify user and broadcast
+    // Send broadcast message
     QString broadcastMessage = (value == 1)
-                                   ? "The Cosmic Chaos Event has started!"
-                                   : "The Cosmic Chaos Event has ended!";
+                                   ? QString("The %1 Event has started!").arg(eventName)
+                                   : QString("The %1 Event has ended!").arg(eventName);
     if (serverProcess->state() == QProcess::Running) {
         serverProcess->write(QString("!server broadcast %1\n").arg(broadcastMessage).toUtf8());
         ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
@@ -1456,276 +1418,65 @@ void MainWindow::onCosmicChaosSwitchChanged(int value) {
         QMessageBox::warning(this, "Error", "Server is not running.");
     }
 
-    QString status = (value == 1) ? "enabled" : "disabled";
-    ui->ServerOutputEdit->append(QString("Cosmic Chaos event %1.").arg(status));
+    // Log the status
+    ui->ServerOutputEdit->append(QString("%1 event %2.").arg(eventName, (value == 1) ? "enabled" : "disabled"));
 }
 
-void MainWindow::onMidtownMadnessSwitchChanged(int value) {
-    // Save the state using QSettings
-    QSettings settings("PTM", "MHServerEmuUI");
-    settings.setValue("MidtownMadnessEvent", value);
-
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
-
-    if (!QFile::exists(filePath)) {
-        qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
+void MainWindow::onCustomEventSwitchChanged(int eventIndex, int value) {
+    // Get the corresponding line edit based on eventIndex
+    QLineEdit *eventLineEdit = findChild<QLineEdit *>(QString("LineEditCustomEvent%1").arg(eventIndex));
+    if (!eventLineEdit) {
+        QMessageBox::warning(this, "Error", "Failed to find the event name input field.");
         return;
     }
 
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
+    QString eventFileName = eventLineEdit->text().trimmed();
+    if (eventFileName.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Please enter a valid event file name.");
         return;
     }
 
-    QByteArray jsonData = file.readAll();
-    file.close();
+    // Define the server folder
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString activeFilePath = serverPath + eventFileName;
+    QString inactiveFilePath = serverPath + "OFF_" + eventFileName;
 
-    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-    if (doc.isNull() || !doc.isArray()) {
-        qDebug() << "Invalid JSON structure.";
-        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
-        return;
-    }
+    QFile activeFile(activeFilePath);
+    QFile inactiveFile(inactiveFilePath);
 
-    QJsonArray dataArray = doc.array();
-    bool updated = false;
-
-    // Locate and update the specific "Midtown Madness" entry
-    for (int i = 0; i < dataArray.size(); ++i) {
-        QJsonObject obj = dataArray[i].toObject();
-        if (obj["Prototype"].toString() == "Loot/Tables/Mob/Bosses/PatrolMidtown/Subtable/SharedMidtownMADNESS.prototype" &&
-            obj["Setting"].toString() == "eLTTV_Enabled") {
-            if (obj.contains("Value")) {
-                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable the event
-                dataArray[i] = obj;
-                updated = true;
-                break; // Stop after updating the relevant entry
-            }
+    if (value == 1) {
+        // Enabling the event (remove "OFF_" prefix)
+        if (!inactiveFile.exists()) {
+            QMessageBox::warning(this, "Error", QString("Inactive file not found: %1").arg(inactiveFilePath));
+            return;
+        }
+        if (!inactiveFile.rename(activeFilePath)) {
+            QMessageBox::critical(this, "Error", QString("Failed to enable the event: %1").arg(inactiveFile.errorString()));
+            return;
+        }
+    } else {
+        // Disabling the event (add "OFF_" prefix)
+        if (!activeFile.exists()) {
+            QMessageBox::warning(this, "Error", QString("Active file not found: %1").arg(activeFilePath));
+            return;
+        }
+        if (!activeFile.rename(inactiveFilePath)) {
+            QMessageBox::critical(this, "Error", QString("Failed to disable the event: %1").arg(activeFile.errorString()));
+            return;
         }
     }
 
-    if (!updated) {
-        QMessageBox::warning(this, "Warning", "No entries for 'Midtown Madness Event' found in the JSON file.");
-        return;
-    }
+    // Notify user and update log
+    QString status = (value == 1) ? "enabled" : "disabled";
+    ui->ServerOutputEdit->append(QString("Custom Event %1 %2.").arg(eventFileName, status));
 
-    // Save the modified JSON back to the file
-    doc.setArray(dataArray);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        return;
-    }
-
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
-    qDebug() << "JSON file updated successfully.";
-
-    // Send the broadcast message
-    QString broadcastMessage = (value == 1)
-                                   ? "The Midtown Madness Event has started!"
-                                   : "The Midtown Madness Event has ended!";
+    // Reload live tuning if server is running
     if (serverProcess->state() == QProcess::Running) {
-        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
-        serverProcess->write(broadcastCommand.toUtf8());
-        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
-
-        // Reload live tuning data
         serverProcess->write("!server reloadlivetuning\n");
         ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
     } else {
         QMessageBox::warning(this, "Error", "Server is not running.");
     }
-
-    // Notify the user
-    QString status = (value == 1) ? "enabled" : "disabled";
-    ui->ServerOutputEdit->append(QString("Midtown Madness event %1.").arg(status));
-}
-
-void MainWindow::onArmorIncursionSwitchChanged(int value) {
-    // Save the state using QSettings
-    QSettings settings("PTM", "MHServerEmuUI");
-    settings.setValue("ArmorIncursionEvent", value);
-
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
-
-    if (!QFile::exists(filePath)) {
-        qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
-        return;
-    }
-
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
-        return;
-    }
-
-    QByteArray jsonData = file.readAll();
-    file.close();
-
-    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-    if (doc.isNull() || !doc.isArray()) {
-        qDebug() << "Invalid JSON structure.";
-        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
-        return;
-    }
-
-    QJsonArray dataArray = doc.array();
-    bool updated = false;
-
-    // Adjust values for "ARMOR Drive Event"
-    for (int i = 0; i < dataArray.size(); ++i) {
-        QJsonObject obj = dataArray[i].toObject();
-
-        // Enable or disable all "ARMORDriveEvent" entries
-        if (obj["Prototype"].toString().contains("ARMORDriveEvent", Qt::CaseInsensitive)) {
-            if (obj.contains("Value")) {
-                obj["Value"] = (value == 1) ? 2.0 : 0.0;
-                dataArray[i] = obj;
-                updated = true;
-            }
-        }
-
-        // Multiply or reset the value for "eGTV_XPGain"
-        if (obj["Setting"].toString() == "eGTV_XPGain") {
-            if (obj.contains("Value")) {
-                double currentValue = obj["Value"].toDouble();
-                obj["Value"] = (value == 1) ? currentValue * 2 : currentValue / 2;
-                dataArray[i] = obj;
-                updated = true;
-                qDebug() << QString("Adjusted eGTV_XPGain: Value changed to %1").arg(obj["Value"].toDouble());
-            }
-        }
-    }
-
-    if (!updated) {
-        QMessageBox::warning(this, "Warning", "No entries for 'Armor Incursion Event' found in the JSON file.");
-        return;
-    }
-
-    // Save the modified JSON back to the file
-    doc.setArray(dataArray);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        return;
-    }
-
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
-    qDebug() << "JSON file updated successfully.";
-
-    // Send the broadcast message
-    QString broadcastMessage = (value == 1)
-                                   ? "The ARMOR Incursion Event has started!"
-                                   : "The ARMOR Incursion Event has ended!";
-    if (serverProcess->state() == QProcess::Running) {
-        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
-        serverProcess->write(broadcastCommand.toUtf8());
-        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
-
-        // Reload live tuning data
-        serverProcess->write("!server reloadlivetuning\n");
-        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
-    } else {
-        QMessageBox::warning(this, "Error", "Server is not running.");
-    }
-
-    // Notify the user
-    QString status = (value == 1) ? "enabled" : "disabled";
-    ui->ServerOutputEdit->append(QString("Armor Incursion event %1.").arg(status));
-}
-
-void MainWindow::onOdinsBountySwitchChanged(int value) {
-    // Save the state using QSettings
-    QSettings settings("PTM", "MHServerEmuUI");
-    settings.setValue("OdinsBountyEvent", value);
-
-    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
-
-    if (!QFile::exists(filePath)) {
-        qDebug() << "File does not exist.";
-        QMessageBox::warning(this, "Error", QString("File not found: %1").arg(filePath));
-        return;
-    }
-
-    QFile file(filePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file: %1").arg(file.errorString()));
-        return;
-    }
-
-    QByteArray jsonData = file.readAll();
-    file.close();
-
-    QJsonDocument doc = QJsonDocument::fromJson(jsonData);
-    if (doc.isNull() || !doc.isArray()) {
-        qDebug() << "Invalid JSON structure.";
-        QMessageBox::critical(this, "Error", "Invalid JSON file format.");
-        return;
-    }
-
-    QJsonArray dataArray = doc.array();
-    bool updated = false;
-
-    // Define the prototypes for Odin's Bounty event
-    QStringList odinsBountyPrototypes = {
-        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinBrooklynBuffed.prototype",
-        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinDangerRoomBuffed.prototype",
-        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinHightownBuffed.prototype",
-        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinMidtownBuffed.prototype",
-        "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/OdinUltronBuffed.prototype"
-    };
-
-    // Adjust the relevant entries in the JSON array
-    for (int i = 0; i < dataArray.size(); ++i) {
-        QJsonObject obj = dataArray[i].toObject();
-        if (odinsBountyPrototypes.contains(obj["Prototype"].toString()) &&
-            obj["Setting"].toString() == "eLTTV_Enabled") {
-            if (obj.contains("Value")) {
-                obj["Value"] = (value == 1) ? 2.0 : 0.0; // Enable or disable the event
-                dataArray[i] = obj;
-                updated = true;
-            }
-        }
-    }
-
-    if (!updated) {
-        QMessageBox::warning(this, "Warning", "No entries for 'Odin's Bounty Event' found in the JSON file.");
-        return;
-    }
-
-    // Save the modified JSON back to the file
-    doc.setArray(dataArray);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open file for writing: %1").arg(file.errorString()));
-        return;
-    }
-
-    file.write(doc.toJson(QJsonDocument::Indented));
-    file.close();
-    qDebug() << "JSON file updated successfully.";
-
-    // Send the broadcast message
-    QString broadcastMessage = (value == 1)
-                                   ? "Odin's Bounty Event has started!"
-                                   : "Odin's Bounty Event has ended!";
-    if (serverProcess->state() == QProcess::Running) {
-        QString broadcastCommand = QString("!server broadcast %1\n").arg(broadcastMessage);
-        serverProcess->write(broadcastCommand.toUtf8());
-        ui->ServerOutputEdit->append(QString("Sent broadcast message: %1").arg(broadcastMessage));
-
-        // Reload live tuning data
-        serverProcess->write("!server reloadlivetuning\n");
-        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
-    } else {
-        QMessageBox::warning(this, "Error", "Server is not running.");
-    }
-
-    // Notify the user
-    QString status = (value == 1) ? "enabled" : "disabled";
-    ui->ServerOutputEdit->append(QString("Odin's Bounty event %1.").arg(status));
 }
 
 void MainWindow::setupUserListContextMenu() {
@@ -1741,30 +1492,105 @@ void MainWindow::showUserContextMenu(const QPoint &pos) {
     // Create the context menu
     QMenu contextMenu(this);
 
-    // Existing actions
     QAction *kickUserAction = new QAction("Kick User", &contextMenu);
     QAction *banUserAction = new QAction("Ban User", &contextMenu);
-
-    // New "Get User Info" action
-    QAction *getUserInfoAction = new QAction("Get User Info", &contextMenu);
+    QAction *updateLevelAction = new QAction("Update Account Level", &contextMenu);
+    QAction *clientInfoAction = new QAction("Client Info", &contextMenu);
 
     // Connect actions to slots
     connect(kickUserAction, &QAction::triggered, this, &MainWindow::kickUser);
     connect(banUserAction, &QAction::triggered, this, &MainWindow::banUser);
 
-    // Connect "Get User Info" action to sendClientInfoCommand
-    connect(getUserInfoAction, &QAction::triggered, this, [this, item]() {
-        QString sessionId = item->data(Qt::UserRole).toString();
-        sendClientInfoCommand(sessionId);
+    // Connect "Update Account Level" action
+    connect(updateLevelAction, &QAction::triggered, this, [this, item]() {
+        QString username = item->text(); // The list item's text is the username
+        showUpdateLevelDialog(username);
+    });
+
+    // Connect "Client Info" action
+    connect(clientInfoAction, &QAction::triggered, this, [this, item]() {
+        QString username = item->text(); // Assuming username is stored as the item text
+        QString sessionId = item->data(Qt::UserRole).toString(); // Assuming session ID is stored in UserRole
+        QString email = getEmailFromDatabase(username);
+
+        if (email.isEmpty()) {
+            QMessageBox::warning(this, "Error", "Failed to retrieve email for the account.");
+            return;
+        }
+
+        // Send the client info command with session ID, username, and email
+        sendClientInfoCommand(sessionId, username, email);
     });
 
     // Add actions to the context menu
     contextMenu.addAction(kickUserAction);
     contextMenu.addAction(banUserAction);
-    contextMenu.addAction(getUserInfoAction);
+    contextMenu.addAction(updateLevelAction);
+    contextMenu.addAction(clientInfoAction);
 
     // Show the context menu
     contextMenu.exec(ui->listWidgetLoggedInUsers->mapToGlobal(pos));
+}
+
+void MainWindow::showUpdateLevelDialog(const QString &username) {
+    if (serverProcess->state() != QProcess::Running) {
+        QMessageBox::warning(this, "Error", "Server is not running. Start the server first.");
+        return;
+    }
+
+    // Retrieve the email from the database
+    QString email = getEmailFromDatabase(username);
+    if (email.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Failed to retrieve email for the account.");
+        return;
+    }
+
+    // Create a dialog for selecting the account level
+    QDialog dialog(this);
+    dialog.setWindowTitle("Update Account Level");
+
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    QLabel *label = new QLabel(QString("Update level for account: %1 (%2)").arg(username, email), &dialog);
+    QComboBox *levelComboBox = new QComboBox(&dialog);
+    levelComboBox->addItems({"User", "Moderator", "Administrator"}); // Example levels
+
+    QPushButton *updateButton = new QPushButton("Update", &dialog);
+    QPushButton *cancelButton = new QPushButton("Cancel", &dialog);
+
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    buttonLayout->addWidget(updateButton);
+    buttonLayout->addWidget(cancelButton);
+
+    layout->addWidget(label);
+    layout->addWidget(levelComboBox);
+    layout->addLayout(buttonLayout);
+
+    connect(updateButton, &QPushButton::clicked, &dialog, &QDialog::accept);
+    connect(cancelButton, &QPushButton::clicked, &dialog, &QDialog::reject);
+
+    // Show the dialog and process the result
+    if (dialog.exec() == QDialog::Accepted) {
+        QString selectedLevel = levelComboBox->currentText();
+
+        if (selectedLevel.isEmpty()) {
+            QMessageBox::warning(this, "Error", "Level cannot be empty.");
+            return;
+        }
+
+        // Map level names to numeric values
+        int levelValue = 0; // Default to User
+        if (selectedLevel == "Moderator") {
+            levelValue = 1;
+        } else if (selectedLevel == "Administrator") {
+            levelValue = 2;
+        }
+
+        // Send the command to the server
+        QString command = QString("!account userlevel %1 %2\n").arg(email).arg(levelValue);
+        serverProcess->write(command.toUtf8());
+        ui->ServerOutputEdit->append(QString("Sent command: %1").arg(command));
+    }
 }
 
 void MainWindow::addUserToList(const QString &username, const QString &sessionId) {
@@ -1796,19 +1622,30 @@ void MainWindow::removeUserFromLoggedInMap(const QString &sessionId) {
     }
 }
 
-void MainWindow::sendClientInfoCommand(const QString &sessionId) {
+void MainWindow::sendClientInfoCommand(const QString &sessionId, const QString &username, const QString &email) {
     if (sessionId.isEmpty()) {
         qDebug() << "Invalid session ID.";
         return;
     }
 
+    // Store username and email for later use
+    userInfoMap[sessionId] = {username, email}; // userInfoMap is a QMap<QString, QPair<QString, QString>>
+
     QString command = QString("!client info %1\n").arg(sessionId);
     serverProcess->write(command.toUtf8());
-    qDebug() << "Sent command:" << command;
+    qDebug() << "Sent command:" << command << "for Username:" << username << ", Email:" << email;
 }
 
-void MainWindow::displayUserInfo(const QString &info) {
-    ui->userInfoDisplay->setPlainText(info);
+void MainWindow::displayUserInfo(const QString &info, const QString &username, const QString &email) {
+    qDebug() << "Displaying info for Username:" << username
+             << ", Email:" << email
+             << "\nInfo Block:\n" << info;
+
+    // ✅ Use multi-arg QString::arg() for better efficiency
+    QString displayText = QString("Username: %1\nEmail: %2\n\n%3")
+                              .arg(username, email.isEmpty() ? "N/A" : email, info);
+
+    ui->userInfoDisplay->setPlainText(displayText);
 }
 
 void MainWindow::kickUser() {
@@ -1827,12 +1664,73 @@ void MainWindow::kickUser() {
 }
 
 void MainWindow::banUser() {
+    // Get the selected user from the list
     QListWidgetItem *item = ui->listWidgetLoggedInUsers->currentItem();
     if (!item) return;
 
-    QString accountName = item->text(); // Assuming the user name is displayed
-    QString command = QString("!account ban %1\n").arg(accountName);
+    QString username = item->text(); // Username is displayed in the list
 
-    serverProcess->write(command.toUtf8());
-    ui->ServerOutputEdit->append(QString("Banned user: %1").arg(accountName));
+    // Retrieve the email from the database
+    QString email = getEmailFromDatabase(username);
+    if (email.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Failed to retrieve email for the selected account.");
+        return;
+    }
+
+    // Send the ban command using the email
+    QString banCommand = QString("!account ban %1\n").arg(email);
+    serverProcess->write(banCommand.toUtf8());
+    ui->ServerOutputEdit->append(QString("Banned user: %1 (%2)").arg(username, email));
+
+    // Automatically kick the banned user using their username
+    kickUser();
+}
+
+QString MainWindow::getEmailFromDatabase(const QString &username) {
+    qDebug() << "Fetching email for PlayerName:" << username;
+
+    if (username.isEmpty()) {
+        qDebug() << "PlayerName is empty, skipping database query.";
+        return QString();
+    }
+
+    // Ensure the database connection
+    if (!QSqlDatabase::contains("AppConnection")) {
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "AppConnection");
+        QString serverPath = ui->mhServerPathEdit->text().trimmed();
+        QString dbPath = serverPath + "/MHServerEmu/Data/account.db";
+        db.setDatabaseName(dbPath);
+
+        if (!db.open()) {
+            qDebug() << "Failed to open database:" << db.lastError().text();
+            return QString();
+        }
+    }
+
+    QSqlDatabase db = QSqlDatabase::database("AppConnection");
+
+    if (!db.isOpen()) {
+        qDebug() << "Database is not open.";
+        return QString();
+    }
+
+    // Prepare and execute the query
+    QSqlQuery query(db);
+    query.prepare("SELECT Email FROM Account WHERE PlayerName = :username");
+    query.bindValue(":username", username);
+    qDebug() << "Executing query:" << query.executedQuery();
+
+    if (!query.exec()) {
+        qDebug() << "Query execution failed:" << query.lastError().text();
+        return QString();
+    }
+
+    if (query.next()) {
+        QString email = query.value(0).toString().trimmed();
+        qDebug() << "Email fetched successfully:" << email;
+        return email;
+    }
+
+    qDebug() << "No email found for PlayerName:" << username;
+    return QString();
 }
