@@ -79,13 +79,13 @@ MainWindow::MainWindow(QWidget *parent)
 
     // Initialize event states based on LiveTuningData.json
     initializeEventStates();
-    verifyAndCopyEventFiles();
 
     connect(ui->pushButtonShutdown, &QPushButton::clicked, this, &MainWindow::onPushButtonShutdownClicked);
     connect(ui->loadLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onLoadLiveTuning);
     connect(ui->saveLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onSaveLiveTuning);
     connect(ui->reloadLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onReloadLiveTuning);
     connect(ui->browseButton, &QPushButton::clicked, this, &MainWindow::onBrowseButtonClicked);
+    connect(ui->mhServerPathEdit, &QLineEdit::editingFinished, this, &MainWindow::onServerPathEditUpdated);
     connect(ui->startClientButton, &QPushButton::clicked, this, &MainWindow::onStartClientButtonClicked);
     connect(ui->updateButton, &QPushButton::clicked, this, &MainWindow::onUpdateButtonClicked);
     connect(ui->startServerButton, &QPushButton::clicked, this, &MainWindow::startServer);
@@ -163,12 +163,26 @@ void MainWindow::onBrowseButtonClicked() {
                                                     QDir::homePath(),
                                                     QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
     if (!dir.isEmpty()) {
-        ui->mhServerPathEdit->setText(dir); // Update the Line Edit with the selected path
-
-        // Save the path to settings
-        QSettings settings("PTM", "MHServerEmuUI");
-        settings.setValue("serverPath", dir);
+        ui->mhServerPathEdit->setText(dir); // Update the line edit
+        onServerPathEditUpdated();
     }
+}
+
+void MainWindow::onServerPathEditUpdated() {
+    QString newPath = ui->mhServerPathEdit->text().trimmed();
+    if (newPath.isEmpty()) {
+        QMessageBox::warning(this, "Error", "Server path cannot be empty.");
+        return;
+    }
+
+    // Save the updated path
+    QSettings settings("PTM", "MHServerEmuUI");
+    settings.setValue("serverPath", newPath);
+
+    qDebug() << "Server path updated to:" << newPath;
+
+    // Call the function to check and copy missing event files
+    verifyAndCopyEventFiles();
 }
 
 void MainWindow::startServer() {
@@ -1315,11 +1329,6 @@ void MainWindow::updateServerStatus() {
     output = process.readAllStandardOutput().trimmed();
     bool isApacheRunning = output.contains("httpd.exe");
     ui->apacheServerStatusLabel->setPixmap(isApacheRunning ? onPixmap : offPixmap);
-}
-
-void MainWindow::onServerPathEditUpdated() {
-    QSettings settings("PTM", "MHServerEmuUI");
-    settings.setValue("serverPath", ui->mhServerPathEdit->text());
 }
 
 void MainWindow::onPushButtonSendToServerClicked() {
