@@ -12605,7 +12605,7 @@ border: 1px solid gray;</string>
         <string>Name of the JSON save file to use relative to the server's Data directory</string>
        </property>
        <property name="text">
-        <string>FileName</string>
+        <string>PlayerName</string>
        </property>
       </widget>
       <widget class="QLineEdit" name="lineEditJsonPlayerName">
@@ -15152,7 +15152,7 @@ border: 1px solid gray;</string>
         <x>740</x>
         <y>0</y>
         <width>321</width>
-        <height>131</height>
+        <height>151</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -15296,14 +15296,48 @@ color:black;
 border: 1px solid gray;</string>
        </property>
       </widget>
+      <widget class="QLabel" name="labelTrashedItemExpirationTimeMultiplier">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>120</y>
+         <width>211</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Affects how long items trashed by players remain on the ground.</string>
+       </property>
+       <property name="text">
+        <string>TrashedItemExpirationTimeMultiplier</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditTrashedItemExpirationTimeMultiplier">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>120</y>
+         <width>81</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>Affects how long items trashed by players remain on the ground.</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: white;
+color:black;
+border: 1px solid gray;</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBoxBilling">
       <property name="geometry">
        <rect>
         <x>740</x>
-        <y>130</y>
+        <y>150</y>
         <width>321</width>
-        <height>251</height>
+        <height>271</height>
        </rect>
       </property>
       <property name="styleSheet">
@@ -15313,7 +15347,7 @@ color: white;</string>
       <property name="title">
        <string>Billing</string>
       </property>
-      <widget class="QLabel" name="labelCurrencyBalance">
+      <widget class="QLabel" name="labelGazillioniteBalanceForNewAccounts">
        <property name="geometry">
         <rect>
          <x>10</x>
@@ -15323,13 +15357,13 @@ color: white;</string>
         </rect>
        </property>
        <property name="toolTip">
-        <string>The amount of Gs to display in the UI.</string>
+        <string>The amount of Gs new accounts will get when they log in for the first time.</string>
        </property>
        <property name="text">
-        <string>CurrencyBalance</string>
+        <string>GBalanceForNewAccounts</string>
        </property>
       </widget>
-      <widget class="QLineEdit" name="lineEditCurrencyBalance">
+      <widget class="QLineEdit" name="lineEditGazillioniteBalanceForNewAccounts">
        <property name="geometry">
         <rect>
          <x>190</x>
@@ -15339,7 +15373,7 @@ color: white;</string>
         </rect>
        </property>
        <property name="toolTip">
-        <string>The amount of Gs to display in the UI.</string>
+        <string>The amount of Gs new accounts will get when they log in for the first time.</string>
        </property>
        <property name="styleSheet">
         <string notr="true">background: white;
@@ -15351,7 +15385,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>80</y>
+         <y>100</y>
          <width>261</width>
          <height>16</height>
         </rect>
@@ -15367,7 +15401,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>80</y>
+         <y>100</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15385,7 +15419,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>120</y>
+         <y>140</y>
          <width>201</width>
          <height>21</height>
         </rect>
@@ -15401,7 +15435,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>100</y>
+         <y>120</y>
          <width>231</width>
          <height>16</height>
         </rect>
@@ -15417,7 +15451,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>100</y>
+         <y>120</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15435,7 +15469,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>120</y>
+         <y>140</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15453,7 +15487,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>160</y>
+         <y>180</y>
          <width>261</width>
          <height>21</height>
         </rect>
@@ -15469,7 +15503,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>140</y>
+         <y>160</y>
          <width>351</width>
          <height>16</height>
         </rect>
@@ -15485,7 +15519,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>140</y>
+         <y>160</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15503,7 +15537,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>160</y>
+         <y>180</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15524,7 +15558,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>200</y>
+         <y>220</y>
          <width>291</width>
          <height>21</height>
         </rect>
@@ -15540,7 +15574,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>180</y>
+         <y>200</y>
          <width>291</width>
          <height>21</height>
         </rect>
@@ -15556,7 +15590,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>180</y>
+         <y>200</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15574,7 +15608,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>200</y>
+         <y>220</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15595,7 +15629,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>190</x>
-         <y>220</y>
+         <y>240</y>
          <width>111</width>
          <height>20</height>
         </rect>
@@ -15616,7 +15650,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>220</y>
+         <y>240</y>
          <width>271</width>
          <height>21</height>
         </rect>
@@ -15632,7 +15666,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>40</y>
+         <y>60</y>
          <width>181</width>
          <height>21</height>
         </rect>
@@ -15651,7 +15685,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>60</y>
+         <y>80</y>
          <width>181</width>
          <height>21</height>
         </rect>
@@ -15664,6 +15698,40 @@ border: 1px solid gray;</string>
        </property>
        <property name="checked">
         <bool>false</bool>
+       </property>
+      </widget>
+      <widget class="QLabel" name="labelESToGazillioniteConversionRatio">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>40</y>
+         <width>181</width>
+         <height>16</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The amount of Gs players will get for each Eternity Splinter when converting them.</string>
+       </property>
+       <property name="text">
+        <string>ESToGazillioniteConversionRatio</string>
+       </property>
+      </widget>
+      <widget class="QLineEdit" name="lineEditESToGazillioniteConversionRatio">
+       <property name="geometry">
+        <rect>
+         <x>190</x>
+         <y>40</y>
+         <width>101</width>
+         <height>20</height>
+        </rect>
+       </property>
+       <property name="toolTip">
+        <string>The amount of Gs players will get for each Eternity Splinter when converting them.</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: white;
+color:black;
+border: 1px solid gray;</string>
        </property>
       </widget>
      </widget>

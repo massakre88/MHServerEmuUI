@@ -1178,9 +1178,11 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->checkBoxDisableMovementPowerChargeCost->setChecked(settings.value("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
     ui->checkBoxDisableInstancedLoot->setChecked(settings.value("CustomGameOptions/DisableInstancedLoot", false).toBool());
     ui->lineEditLootSpawnGridCellRadius->setText(settings.value("CustomGameOptions/LootSpawnGridCellRadius", "").toString());
+    ui->lineEditTrashedItemExpirationTimeMultiplier->setText(settings.value("CustomGameOptions/TrashedItemExpirationTimeMultiplier", "").toString());
 
     // Load Billing settings
-    ui->lineEditCurrencyBalance->setText(settings.value("Billing/CurrencyBalance", "").toString());
+    ui->lineEditGazillioniteBalanceForNewAccounts->setText(settings.value("Billing/GazillioniteBalanceForNewAccounts", "").toString());
+    ui->lineEditESToGazillioniteConversionRatio->setText(settings.value("Billing/ESToGazillioniteConversionRatio", "").toString());
     ui->checkBoxApplyCatalogPatch->setChecked(settings.value("Billing/ApplyCatalogPatch", false).toBool());
     ui->checkBoxOverrideStoreUrls->setChecked(settings.value("Billing/OverrideStoreUrls", false).toBool());
     ui->lineEditStoreHomePageUrl->setText(settings.value("Billing/StoreHomePageUrl", "").toString());
@@ -1243,7 +1245,62 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Frontend/SendTimeoutMS", ui->lineEditSendTimeoutMS->text()},
         {"Auth/Address", ui->lineEditAuthAddress->text()},
         {"Auth/Port", ui->lineEditAuthPort->text()},
-        {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"}
+        {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
+        {"PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked() ? "true" : "false"},
+        {"PlayerManager/IgnoreSessionToken", ui->checkBoxIgnoreSessionToken->isChecked() ? "true" : "false"},
+        {"PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked() ? "true" : "false"},
+        {"PlayerManager/SimulateQueue", ui->checkBoxSimulateQueue->isChecked() ? "true" : "false"},
+        {"PlayerManager/QueuePlaceInLine", ui->lineEditQueuePlaceInLine->text()},
+        {"PlayerManager/QueueNumberOfPlayersInLine", ui->lineEditQueueNumberOfPlayersInLine->text()},
+        {"PlayerManager/ShowNewsOnLogin", ui->checkBoxShowNewsOnLogin->isChecked() ? "true" : "false"},
+        {"PlayerManager/NewsUrl", ui->lineEditNewsUrl->text()},
+        {"SQLiteDBManager/FileName", ui->lineEditJsonFileName->text()},
+        {"SQLiteDBManager/MaxBackupNumber", ui->lineEditJsonMaxBackupNumber->text()},
+        {"SQLiteDBManager/BackupIntervalMinutes", ui->lineEditJsonBackupIntervalMinutes->text()},
+        {"SQLiteDBManager/PlayerName", ui->lineEditJsonPlayerName->text()},
+        {"GroupingManager/MotdPlayerName", ui->lineEditMotdPlayerName->text()},
+        {"GroupingManager/MotdText", ui->textEditMotdText->toPlainText()},
+        {"GroupingManager/MotdPrestigeLevel", QString::number(ui->comboBoxMotdPrestigeLevel->currentIndex())},
+        {"GameData/LoadAllPrototypes", ui->checkBoxLoadAllPrototypes->isChecked() ? "true" : "false"},
+        {"GameData/UseEquipmentSlotTableCache", ui->checkBoxUseEquipmentSlotTableCache->isChecked() ? "true" : "false"},
+        {"GameOptions/TeamUpSystemEnabled", ui->checkBoxTeamUpSystemEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/AchievementsEnabled", ui->checkBoxAchievementsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/OmegaMissionsEnabled", ui->checkBoxOmegaMissionsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/VeteranRewardsEnabled", ui->checkBoxVeteranRewardsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/MultiSpecRewardsEnabled", ui->checkBoxMultiSpecRewardsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/GiftingEnabled", ui->checkBoxGiftingEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/CharacterSelectV2Enabled", ui->checkBoxCharacterSelectV2Enabled->isChecked() ? "true" : "false"},
+        {"GameOptions/CommunityNewsV2Enabled", ui->checkBoxCommunityNewsV2Enabled->isChecked() ? "true" : "false"},
+        {"GameOptions/LeaderboardsEnabled", ui->checkBoxLeaderboardsEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/NewPlayerExperienceEnabled", ui->checkBoxNewPlayerExperienceEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/MissionTrackerV2Enabled", ui->checkBoxMissionTrackerV2Enabled->isChecked() ? "true" : "false"},
+        {"GameOptions/GiftingAccountAgeInDaysRequired", ui->lineEditGiftingAccountAgeInDaysRequired->text()},
+        {"GameOptions/GiftingAvatarLevelRequired", ui->lineEditGiftingAvatarLevelRequired->text()},
+        {"GameOptions/GiftingLoginCountRequired", ui->lineEditGiftingLoginCountRequired->text()},
+        {"GameOptions/InfinitySystemEnabled", ui->checkBoxInfinitySystemEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/ChatBanVoteAccountAgeInDaysRequired", ui->lineEditChatBanVoteAccountAgeInDaysRequired->text()},
+        {"GameOptions/ChatBanVoteAvatarLevelRequired", ui->lineEditChatBanVoteAvatarLevelRequired->text()},
+        {"GameOptions/ChatBanVoteLoginCountRequired", ui->lineEditChatBanVoteLoginCountRequired->text()},
+        {"GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked() ? "true" : "false"},
+        {"GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text()},
+        {"CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text()},
+        {"CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/DisableInstancedLoot", ui->checkBoxDisableInstancedLoot->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/LootSpawnGridCellRadius", ui->lineEditLootSpawnGridCellRadius->text()},
+        {"CustomGameOptions/TrashedItemExpirationTimeMultiplier", ui->lineEditTrashedItemExpirationTimeMultiplier->text()},
+        {"Billing/GazillioniteBalanceForNewAccounts", ui->lineEditGazillioniteBalanceForNewAccounts->text()},
+        {"Billing/ESToGazillioniteConversionRatio", ui->lineEditESToGazillioniteConversionRatio->text()},
+        {"Billing/ApplyCatalogPatch", ui->checkBoxApplyCatalogPatch->isChecked() ? "true" : "false"},
+        {"Billing/OverrideStoreUrls", ui->checkBoxOverrideStoreUrls->isChecked() ? "true" : "false"},
+        {"Billing/StoreHomePageUrl", ui->lineEditStoreHomePageUrl->text()},
+        {"Billing/StoreHomeBannerPageUrl", ui->lineEditStoreHomeBannerPageUrl->text()},
+        {"Billing/StoreHeroesBannerPageUrl", ui->lineEditStoreHeroesBannerPageUrl->text()},
+        {"Billing/StoreCostumesBannerPageUrl", ui->lineEditStoreCostumesBannerPageUrl->text()},
+        {"Billing/StoreBoostsBannerPageUrl", ui->lineEditStoreBoostsBannerPageUrl->text()},
+        {"Billing/StoreChestsBannerPageUrl", ui->lineEditStoreChestsBannerPageUrl->text()},
+        {"Billing/StoreSpecialsBannerPageUrl", ui->lineEditStoreSpecialsBannerPageUrl->text()},
+        {"Billing/StoreRealMoneyUrl", ui->lineEditStoreRealMoneyUrl->text()},
     };
 
     // Modify the settings in the existing lines while keeping comments
