@@ -43,5 +43,25 @@
         "Prototype": "Events/GlobalEvents/EventPowerConditions/OdinsBountyEventPowerCondition.prototype",
         "Setting": "eCTV_Enabled",
         "Value": 2
-    }
+    },
+	{
+    "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDRBuffed.prototype",
+    "Setting": "eLTTV_Enabled",
+    "Value": 0
+  },
+  {
+    "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDGBuffed.prototype",
+    "Setting": "eLTTV_Enabled",
+    "Value": 0
+  },
+  {
+    "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDCBuffed.prototype",
+    "Setting": "eLTTV_Enabled",
+    "Value": 0
+  },
+  {
+    "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDCosmicChestBuffed.prototype",
+    "Setting": "eLTTV_Enabled",
+    "Value": 0
+  }
 ]
