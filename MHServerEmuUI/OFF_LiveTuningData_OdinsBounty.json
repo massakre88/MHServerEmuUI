@@ -47,21 +47,21 @@
 	{
     "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDRBuffed.prototype",
     "Setting": "eLTTV_Enabled",
-    "Value": 0
+    "Value": 2
   },
   {
     "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDGBuffed.prototype",
     "Setting": "eLTTV_Enabled",
-    "Value": 0
+    "Value": 2
   },
   {
     "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDCBuffed.prototype",
     "Setting": "eLTTV_Enabled",
-    "Value": 0
+    "Value": 2
   },
   {
     "Prototype": "Loot/Tables/Mob/Bosses/EndgameDailies/Subtables/EGDCosmicChestBuffed.prototype",
     "Setting": "eLTTV_Enabled",
-    "Value": 0
+    "Value": 2
   }
 ]
