@@ -10,4 +10,7 @@
         <file alias="OdinsBounty">EventOdinsBounty.jpg</file>
         <file alias="MidtownMadness">EventMidtownMadness.jpg</file>
     </qresource>
+    <qresource prefix="/Fonts">
+        <file>Segoe UI.ttf</file>
+    </qresource>
 </RCC>

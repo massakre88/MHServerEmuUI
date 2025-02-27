@@ -22,11 +22,17 @@ set(PROJECT_SOURCES
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+# Windows Icon Resource
+if(WIN32)
+    set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/app_icon.rc")
+endif()
     qt_add_executable(MHServerEmuUI
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        resources.qrc
-    )
+    MANUAL_FINALIZATION
+    ${PROJECT_SOURCES}
+    resources.qrc
+    ${APP_ICON_RESOURCE_WINDOWS} # Add the icon resource
+	)
+
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET MHServerEmuUI APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
 #                 ${CMAKE_CURRENT_SOURCE_DIR}/android)

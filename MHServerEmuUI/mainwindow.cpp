@@ -22,6 +22,7 @@
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
+#include <QFontDatabase>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -33,6 +34,17 @@ MainWindow::MainWindow(QWidget *parent)
 
 {
     ui->setupUi(this);
+
+    int fontId = QFontDatabase::addApplicationFont(":/Segoe IU.ttf");
+    if (fontId != -1) {
+        QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
+        if (!fontFamilies.isEmpty()) {
+            QFont appFont(fontFamilies.first(), 9);  // Set default font size
+            QApplication::setFont(appFont);
+        }
+    } else {
+        qDebug() << "Failed to load custom font!";
+    }
 
     // Load status indicator images
     onPixmap = QPixmap(":/images/on");
