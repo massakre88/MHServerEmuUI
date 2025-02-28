@@ -2783,7 +2783,7 @@ color: white;</string>
         <rect>
          <x>490</x>
          <y>40</y>
-         <width>181</width>
+         <width>183</width>
          <height>101</height>
         </rect>
        </property>
@@ -3722,7 +3722,7 @@ color: white;</string>
          <rect>
           <x>10</x>
           <y>63</y>
-          <width>151</width>
+          <width>165</width>
           <height>21</height>
          </rect>
         </property>
@@ -8381,6 +8381,7 @@ color: white;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -10190,6 +10191,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -11336,6 +11338,7 @@ color: white;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="text">
@@ -15583,6 +15586,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -16562,6 +16566,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -17855,9 +17860,9 @@ border: 1px solid gray;</string>
      <widget class="QPushButton" name="reloadLiveTuningButton">
       <property name="geometry">
        <rect>
-        <x>630</x>
+        <x>625</x>
         <y>90</y>
-        <width>111</width>
+        <width>121</width>
         <height>31</height>
        </rect>
       </property>
@@ -18198,7 +18203,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
-        <pointsize>8</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -18219,9 +18224,9 @@ border: 1px solid gray;</string>
      <widget class="QPushButton" name="loadLiveTuningButton">
       <property name="geometry">
        <rect>
-        <x>630</x>
+        <x>625</x>
         <y>10</y>
-        <width>111</width>
+        <width>121</width>
         <height>31</height>
        </rect>
       </property>
@@ -18562,7 +18567,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
-        <pointsize>8</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -18583,9 +18588,9 @@ border: 1px solid gray;</string>
      <widget class="QPushButton" name="saveLiveTuningButton">
       <property name="geometry">
        <rect>
-        <x>630</x>
+        <x>625</x>
         <y>50</y>
-        <width>111</width>
+        <width>121</width>
         <height>31</height>
        </rect>
       </property>
@@ -18926,7 +18931,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
-        <pointsize>8</pointsize>
+        <pointsize>7</pointsize>
        </font>
       </property>
       <property name="toolTip">
