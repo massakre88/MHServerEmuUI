@@ -457,12 +457,39 @@
        <property name="palette">
         <palette>
          <active>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
           <colorrole role="Button">
            <brush brushstyle="SolidPattern">
             <color alpha="255">
              <red>255</red>
              <green>255</green>
              <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
             </color>
            </brush>
           </colorrole>
@@ -481,17 +508,53 @@
              <red>255</red>
              <green>255</green>
              <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="PlaceholderText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="128">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
             </color>
            </brush>
           </colorrole>
          </active>
          <inactive>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
           <colorrole role="Button">
            <brush brushstyle="SolidPattern">
             <color alpha="255">
              <red>255</red>
              <green>255</green>
              <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
             </color>
            </brush>
           </colorrole>
@@ -510,17 +573,53 @@
              <red>255</red>
              <green>255</green>
              <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="PlaceholderText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="128">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
             </color>
            </brush>
           </colorrole>
          </inactive>
          <disabled>
+          <colorrole role="WindowText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
           <colorrole role="Button">
            <brush brushstyle="SolidPattern">
             <color alpha="255">
              <red>255</red>
              <green>255</green>
              <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="Text">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="ButtonText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="255">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
             </color>
            </brush>
           </colorrole>
@@ -539,6 +638,15 @@
              <red>255</red>
              <green>255</green>
              <blue>255</blue>
+            </color>
+           </brush>
+          </colorrole>
+          <colorrole role="PlaceholderText">
+           <brush brushstyle="SolidPattern">
+            <color alpha="128">
+             <red>0</red>
+             <green>0</green>
+             <blue>0</blue>
             </color>
            </brush>
           </colorrole>
@@ -555,7 +663,8 @@
        </property>
        <property name="styleSheet">
         <string notr="true">background: white;
-border: 1px solid gray;</string>
+border: 1px solid gray;
+color: black</string>
        </property>
       </widget>
       <widget class="QPushButton" name="browseButton">
@@ -904,6 +1013,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -1485,6 +1595,7 @@ color: white;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -1845,6 +1956,7 @@ color: white;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -2205,6 +2317,7 @@ color: white;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="styleSheet">
@@ -2222,8 +2335,8 @@ color: white;</string>
       <widget class="QLabel" name="playerCountLabel">
        <property name="geometry">
         <rect>
-         <x>660</x>
-         <y>20</y>
+         <x>665</x>
+         <y>30</y>
          <width>81</width>
          <height>61</height>
         </rect>
@@ -3366,6 +3479,7 @@ color: white;</string>
         <property name="font">
          <font>
           <family>Times New Roman</family>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -3814,6 +3928,7 @@ color: white;</string>
         <property name="font">
          <font>
           <family>Times New Roman</family>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="styleSheet">
@@ -4917,6 +5032,7 @@ color: white;</string>
         <property name="font">
          <font>
           <family>Times New Roman</family>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="styleSheet">
@@ -5138,6 +5254,7 @@ color: white;</string>
         <property name="font">
          <font>
           <family>Times New Roman</family>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="styleSheet">
@@ -5719,6 +5836,7 @@ color: white;</string>
         <property name="font">
          <font>
           <family>Times New Roman</family>
+          <pointsize>8</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -6777,6 +6895,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -7139,6 +7258,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -7712,11 +7832,13 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true"> background-color: lightgray;
- color: White;
+       <string notr="true">background: solid;
+ background-color: lightgray;
+ color: black;
  border: 1px solid gray;
  padding: 5px 10px;
  border-radius: 3px;</string>
@@ -8086,6 +8208,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="styleSheet">
@@ -17337,6 +17460,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -17700,6 +17824,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -18073,6 +18198,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -18436,6 +18562,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -18799,6 +18926,7 @@ border: 1px solid gray;</string>
       <property name="font">
        <font>
         <family>Times New Roman</family>
+        <pointsize>8</pointsize>
        </font>
       </property>
       <property name="toolTip">
@@ -19599,6 +19727,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
@@ -23855,6 +23984,7 @@ color: black;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="styleSheet">
