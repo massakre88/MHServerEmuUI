@@ -28,6 +28,11 @@
     <height>680</height>
    </size>
   </property>
+  <property name="font">
+   <font>
+    <family>Times New Roman</family>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MHServerEmuUI</string>
   </property>
@@ -117,10 +122,20 @@
       <height>661</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Times New Roman</family>
+     </font>
+    </property>
     <property name="currentIndex">
      <number>0</number>
     </property>
     <widget class="QWidget" name="tab">
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+      </font>
+     </property>
      <attribute name="title">
       <string>Server Control</string>
      </attribute>
@@ -422,6 +437,11 @@
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="title">
        <string>Server Basics</string>
       </property>
@@ -524,6 +544,11 @@
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Folder where server is located</string>
@@ -876,6 +901,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: solid;
  background-color: lightgray;
@@ -1095,6 +1125,11 @@ border: 1px solid gray;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">background: transparent;
@@ -1446,6 +1481,11 @@ color: white;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">background: solid;
@@ -1802,6 +1842,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: solid;
  background-color: lightgray;
@@ -2157,6 +2202,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: solid;
  background-color: lightgray;
@@ -2379,6 +2429,7 @@ color: white;</string>
        </property>
        <property name="font">
         <font>
+         <family>Times New Roman</family>
          <pointsize>48</pointsize>
         </font>
        </property>
@@ -2600,6 +2651,11 @@ color: white;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">background: transparent;
@@ -2952,6 +3008,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: transparent;
 color: white;</string>
@@ -3302,6 +3363,11 @@ color: white;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Update server with latest nightly version.</string>
         </property>
@@ -3524,6 +3590,11 @@ color: white;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background: transparent;
 color: white;</string>
@@ -3740,6 +3811,11 @@ color: white;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="styleSheet">
          <string notr="true">background: transparent;
 color: white;</string>
@@ -3955,6 +4031,11 @@ color: white;</string>
            </colorrole>
           </disabled>
          </palette>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="styleSheet">
          <string notr="true">background: transparent;
@@ -4173,6 +4254,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: transparent;
 color: white;</string>
@@ -4387,6 +4473,11 @@ color: white;</string>
            </colorrole>
           </disabled>
          </palette>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string/>
@@ -4603,6 +4694,11 @@ color: white;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -4817,6 +4913,11 @@ color: white;</string>
            </colorrole>
           </disabled>
          </palette>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="styleSheet">
          <string notr="true">background: transparent;
@@ -5033,6 +5134,11 @@ color: white;</string>
            </colorrole>
           </disabled>
          </palette>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="styleSheet">
          <string notr="true">background: transparent;
@@ -5254,6 +5360,11 @@ color: white;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">background: transparent;
@@ -5605,6 +5716,11 @@ color: white;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Shutdown the server in X minutes and broadcast the message.</string>
         </property>
@@ -5628,6 +5744,11 @@ color: white;</string>
           <height>20</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Message to send when dhutting down. Use SHUTDOWNTIMER to display your minutes till shutdown.</string>
         </property>
@@ -5649,6 +5770,11 @@ color: black</string>
           <height>20</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Minutes till shutdown.</string>
         </property>
@@ -5669,6 +5795,11 @@ color: black</string>
           <width>71</width>
           <height>21</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>Minutes</string>
@@ -5884,6 +6015,7 @@ color: black</string>
         </property>
         <property name="font">
          <font>
+          <family>Times New Roman</family>
           <pointsize>36</pointsize>
          </font>
         </property>
@@ -6243,6 +6375,11 @@ color: white;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -6258,6 +6395,11 @@ color: white;</string>
          <width>191</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="styleSheet">
         <string notr="true">background: transparent;
@@ -6275,6 +6417,11 @@ color: white;</string>
          <width>191</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Account name</string>
@@ -6626,6 +6773,11 @@ border: 1px solid gray;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Unban the account with this e-mail</string>
@@ -6984,6 +7136,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Open account creation in default browser.</string>
        </property>
@@ -7315,6 +7472,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: white;
 border: 1px solid gray;</string>
@@ -7328,6 +7490,11 @@ border: 1px solid gray;</string>
         <width>681</width>
         <height>31</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background: white;
@@ -7542,6 +7709,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true"> background-color: lightgray;
  color: White;
@@ -7561,6 +7733,11 @@ border: 1px solid gray;</string>
         <width>305</width>
         <height>441</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
      </widget>
      <widget class="QPushButton" name="pushButtonRefreshUsers">
@@ -7906,6 +8083,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: solid;
  background-color: lightgray;
@@ -7927,6 +8109,11 @@ border: 1px solid gray;</string>
         <height>129</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -7937,6 +8124,11 @@ color: white;</string>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_2">
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+      </font>
+     </property>
      <attribute name="title">
       <string>Config</string>
      </attribute>
@@ -7951,6 +8143,11 @@ color: white;</string>
         <width>191</width>
         <height>321</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
@@ -7967,6 +8164,11 @@ color: white;</string>
          <width>161</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables logging.</string>
@@ -7987,6 +8189,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables synchronous output for logging (slow, for debugging only).</string>
        </property>
@@ -8003,6 +8210,11 @@ color: white;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Hides sensitive information (emails / IP addresses) from logs.</string>
        </property>
@@ -8018,6 +8230,11 @@ color: white;</string>
          <width>161</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables the console output target.</string>
@@ -8038,6 +8255,11 @@ color: white;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables message timestamps for the console output target.</string>
        </property>
@@ -8053,6 +8275,11 @@ color: white;</string>
          <width>161</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables the file output target.</string>
@@ -8269,6 +8496,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Sets the minimum logging level for the console output target [0-5].</string>
        </property>
@@ -8321,6 +8553,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Sets the minimum logging level for the console output target [0-5].</string>
        </property>
@@ -8336,6 +8573,11 @@ color: white;</string>
          <width>141</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Sets the maximum logging level for the console output target [0-5].</string>
@@ -8552,6 +8794,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Sets the maximum logging level for the console output target [0-5].</string>
        </property>
@@ -8604,6 +8851,11 @@ color: white;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables message timestamps for the file output target.</string>
        </property>
@@ -8622,6 +8874,11 @@ color: white;</string>
          <width>41</width>
          <height>22</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Sets the maximum logging level for the file output target [0-5].</string>
@@ -8675,6 +8932,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Sets the minimum logging level for the file output target [0-5].</string>
        </property>
@@ -8691,6 +8953,11 @@ color: white;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Sets the maximum logging level for the file output target [0-5].</string>
        </property>
@@ -8706,6 +8973,11 @@ color: white;</string>
          <width>41</width>
          <height>22</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Sets the minimum logging level for the file output target [0-5].</string>
@@ -8958,6 +9230,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>IP address for the frontend server to bind to.</string>
        </property>
@@ -8979,6 +9256,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>IP address for the frontend server to bind to.</string>
        </property>
@@ -8994,6 +9276,11 @@ border: 1px solid gray;</string>
          <width>161</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables the file output target.</string>
@@ -9015,6 +9302,11 @@ border: 1px solid gray;</string>
         <height>171</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -9030,6 +9322,11 @@ color: white;</string>
          <width>161</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>IP address for the frontend server to bind to.</string>
@@ -9245,6 +9542,11 @@ color: white;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>IP address for the frontend server to bind to.</string>
@@ -9466,6 +9768,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Port for the frontend server to bind to.</string>
        </property>
@@ -9486,6 +9793,11 @@ border: 1px solid gray;</string>
          <width>151</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Port for the frontend server to bind to.</string>
@@ -9702,6 +10014,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string> An address of the frontend server that needs to be reachable for clients. Can be an IP address (e.g. 192.168.1.2) or a URL (e.g. fes2.marvelheroes.com)</string>
        </property>
@@ -9723,6 +10040,11 @@ border: 1px solid gray;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string> An address of the frontend server that needs to be reachable for clients. Can be an IP address (e.g. 192.168.1.2) or a URL (e.g. fes2.marvelheroes.com)</string>
        </property>
@@ -9741,6 +10063,11 @@ border: 1px solid gray;</string>
          <width>151</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Number of milliseconds the server waits before closing the connection when trying to receive data from a client. Set to 0 to wait indefinitely.</string>
@@ -9960,6 +10287,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of milliseconds the server waits before closing the connection when trying to receive data from a client. Set to 0 to wait indefinitely.</string>
        </property>
@@ -9980,6 +10312,11 @@ border: 1px solid gray;</string>
          <width>151</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Number of milliseconds the server waits before closing the connection when trying to send data to a client. Set to 0 to wait indefinitely.</string>
@@ -10199,6 +10536,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of milliseconds the server waits before closing the connection when trying to send data to a client. Set to 0 to wait indefinitely.</string>
        </property>
@@ -10224,6 +10566,11 @@ border: 1px solid gray;</string>
         <height>91</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -10239,6 +10586,11 @@ color: white;</string>
          <width>141</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables custom web API endpoints.</string>
@@ -10258,6 +10610,11 @@ color: white;</string>
          <width>151</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Port for the auth server to listen on.</string>
@@ -10473,6 +10830,11 @@ color: white;</string>
           </colorrole>
          </disabled>
         </palette>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Port for the auth server to listen on.</string>
@@ -10694,6 +11056,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Address for the auth server to listen on.</string>
        </property>
@@ -10714,6 +11081,11 @@ color: white;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">background: white;
 color:black;
@@ -10733,6 +11105,11 @@ border: 1px solid gray;</string>
         <height>171</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -10748,6 +11125,11 @@ color: white;</string>
          <width>221</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Switches to JSON-based backend for saving player data. NOTE: JSON backend supports only a single account / user.</string>
@@ -10765,6 +11147,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Disables session validation so that multiple Linux clients can log in (DO NOT USE THIS ON PUBLIC SERVERS).</string>
        </property>
@@ -10780,6 +11167,11 @@ color: white;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Allows clients that do not match the server's version of the game to connect.</string>
@@ -10797,6 +11189,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Simulates putting clients into a queue instead of logging them in normally (for testing only).</string>
        </property>
@@ -10812,6 +11209,11 @@ color: white;</string>
          <width>201</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string>QueueNumberOfPlayersInLine</string>
@@ -11025,6 +11427,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of players to show when SimulateQueue is enabled.</string>
        </property>
@@ -11046,6 +11453,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Requests the client to open the news windows after logging in.</string>
        </property>
@@ -11061,6 +11473,11 @@ border: 1px solid gray;</string>
          <width>191</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>News URL for the client's news window.</string>
@@ -11277,6 +11694,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>News URL for the client's news window.</string>
        </property>
@@ -11297,6 +11719,11 @@ border: 1px solid gray;</string>
          <width>201</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string>QueuePlaceInLine</string>
@@ -11510,6 +11937,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of players to show when SimulateQueue is enabled.</string>
        </property>
@@ -11535,6 +11967,11 @@ border: 1px solid gray;</string>
         <height>101</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -11550,6 +11987,11 @@ color: white;</string>
          <width>141</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Name of the SQLite database file to use relative to the server's Data directory.</string>
@@ -11766,6 +12208,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Name of the SQLite database file to use relative to the server's Data directory.</string>
        </property>
@@ -11786,6 +12233,11 @@ border: 1px solid gray;</string>
          <width>181</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The maximum number of backup files to create (oldest backups will be overwritten). Set this to 0 to disable backups.</string>
@@ -12002,6 +12454,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The maximum number of backup files to create (oldest backups will be overwritten). Set this to 0 to disable backups.</string>
        </property>
@@ -12022,6 +12479,11 @@ border: 1px solid gray;</string>
          <width>201</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The minimum interval in minutes between backup creation.</string>
@@ -12238,6 +12700,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The minimum interval in minutes between backup creation.</string>
        </property>
@@ -12263,6 +12730,11 @@ border: 1px solid gray;</string>
         <height>121</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -12278,6 +12750,11 @@ color: white;</string>
          <width>191</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Name of the JSON save file to use relative to the server's Data directory</string>
@@ -12494,6 +12971,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Name of the JSON save file to use relative to the server's Data directory</string>
        </property>
@@ -12514,6 +12996,11 @@ border: 1px solid gray;</string>
          <width>191</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The maximum number of backup files to create (oldest backups will be overwritten). Set this to 0 to disable backups.</string>
@@ -12730,6 +13217,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The maximum number of backup files to create (oldest backups will be overwritten). Set this to 0 to disable backups.</string>
        </property>
@@ -12750,6 +13242,11 @@ border: 1px solid gray;</string>
          <width>201</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The minimum interval in minutes between backup creation.</string>
@@ -12966,6 +13463,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The minimum interval in minutes between backup creation.</string>
        </property>
@@ -12986,6 +13488,11 @@ border: 1px solid gray;</string>
          <width>191</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Name of the JSON save file to use relative to the server's Data directory</string>
@@ -13202,6 +13709,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Name of the JSON save file to use relative to the server's Data directory</string>
        </property>
@@ -13227,6 +13739,11 @@ border: 1px solid gray;</string>
         <height>181</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -13242,6 +13759,11 @@ color: white;</string>
          <width>191</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Sender name for the server's message of the day (MotD).</string>
@@ -13458,6 +13980,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Sender name for the server's message of the day (MotD).</string>
        </property>
@@ -13479,6 +14006,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Determines the color of the MotD's sender name). 0 - white, 1 - green, 2 - blue, 3 - purple, 4 - orange, 5 - red, 6 - yellow (cosmic).</string>
        </property>
@@ -13494,6 +14026,11 @@ border: 1px solid gray;</string>
          <width>53</width>
          <height>22</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Determines the color of the MotD's sender name). 0 - white, 1 - green, 2 - blue, 3 - purple, 4 - orange, 5 - red, 6 - yellow (cosmic).</string>
@@ -13551,6 +14088,11 @@ border: 1px solid gray;</string>
          <width>221</width>
          <height>101</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="title">
         <string>MotdText</string>
@@ -13763,6 +14305,11 @@ border: 1px solid gray;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Message of the day text.</string>
         </property>
@@ -13778,8 +14325,8 @@ p, li { white-space: pre-wrap; }
 hr { height: 1px; border-width: 0; }
 li.unchecked::marker { content: &quot;\2610&quot;; }
 li.checked::marker { content: &quot;\2612&quot;; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Segoe UI'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'Times New Roman'; font-size:9pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Segoe UI';&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </widget>
@@ -13795,6 +14342,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
         <width>281</width>
         <height>71</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
@@ -13812,6 +14364,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Preloads all prototypes on server start. Makes server start slower, but removes lag spikes during the game when data is loaded for the first time.</string>
        </property>
@@ -13827,6 +14384,11 @@ color: white;</string>
          <width>241</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables caching for the EquipmentSlotTable. Makes server start slower if not used with LoadAllPrototypes.</string>
@@ -13848,6 +14410,11 @@ color: white;</string>
         <height>431</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -13863,6 +14430,11 @@ color: white;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables team-ups.</string>
@@ -13883,6 +14455,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables achievements.</string>
        </property>
@@ -13901,6 +14478,11 @@ color: white;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables shared quests.</string>
@@ -13921,6 +14503,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables login rewards.</string>
        </property>
@@ -13939,6 +14526,11 @@ color: white;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables multi-specs.</string>
@@ -13959,6 +14551,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables gifting in the in-game store.</string>
        </property>
@@ -13977,6 +14574,11 @@ color: white;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables the newer starting hero selection screen for new players. Falls back to V1 when disabled.</string>
@@ -13997,6 +14599,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables the newer community news window. Falls back to V1 when disabled.</string>
        </property>
@@ -14015,6 +14622,11 @@ color: white;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables leaderboards.</string>
@@ -14035,6 +14647,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables the tutorial for new players.</string>
        </property>
@@ -14054,6 +14671,11 @@ color: white;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables the newer mission tracker. Falls back to V1 when disabled.</string>
        </property>
@@ -14072,6 +14694,11 @@ color: white;</string>
          <width>231</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Number of days an account needs to exist for to unlock store gifting.</string>
@@ -14288,6 +14915,11 @@ color: white;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of days an account needs to exist for to unlock store gifting.</string>
        </property>
@@ -14308,6 +14940,11 @@ border: 1px solid gray;</string>
          <width>201</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Minimum avatar level that needs to be reached to unlock store gifting.</string>
@@ -14524,6 +15161,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Minimum avatar level that needs to be reached to unlock store gifting.</string>
        </property>
@@ -14544,6 +15186,11 @@ border: 1px solid gray;</string>
          <width>191</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Number of days an account needs to log in for to unlock store gifting.</string>
@@ -14760,6 +15407,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of days an account needs to log in for to unlock store gifting.</string>
        </property>
@@ -14781,6 +15433,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables the Infinity system. Falls back to the Omega system when disabled.</string>
        </property>
@@ -14799,6 +15456,11 @@ border: 1px solid gray;</string>
          <width>231</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Number of days an account needs to exist for to unlock chat spam reporting.</string>
@@ -15015,6 +15677,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of days an account needs to exist for to unlock chat spam reporting.</string>
        </property>
@@ -15035,6 +15702,11 @@ border: 1px solid gray;</string>
          <width>201</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Minimum avatar level that needs to be reached to unlock chat spam reporting.</string>
@@ -15251,6 +15923,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Minimum avatar level that needs to be reached to unlock chat spam reporting.</string>
        </property>
@@ -15271,6 +15948,11 @@ border: 1px solid gray;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string>ChatBanVoteLoginCountRequired</string>
@@ -15484,6 +16166,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Number of days an account needs to log in for to unlock chat spam reporting.</string>
        </property>
@@ -15505,6 +16192,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables region difficulty selection.</string>
        </property>
@@ -15523,6 +16215,11 @@ border: 1px solid gray;</string>
          <width>211</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Enables PS4 trophy unlocks (unused in the PC version).</string>
@@ -15544,6 +16241,11 @@ border: 1px solid gray;</string>
         <height>151</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -15559,6 +16261,11 @@ color: white;</string>
          <width>81</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Interval between region cleanups in milliseconds.</string>
@@ -15578,6 +16285,11 @@ border: 1px solid gray;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The amount of time in milliseconds a region needs to remain unvisited to be eligible for cleanup.</string>
        </property>
@@ -15596,6 +16308,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Interval between region cleanups in milliseconds.</string>
        </property>
@@ -15611,6 +16328,11 @@ border: 1px solid gray;</string>
          <width>211</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The amount of time in milliseconds a region needs to remain unvisited to be eligible for cleanup.</string>
@@ -15628,6 +16350,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Disables charge costs for movement powers to imitate pre-BUE behavior.</string>
        </property>
@@ -15643,6 +16370,11 @@ border: 1px solid gray;</string>
          <width>221</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Makes loot free-for-all, Diablo 2 style.</string>
@@ -15660,6 +16392,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Affects the spacing of loot that drops [16-128].</string>
        </property>
@@ -15675,6 +16412,11 @@ border: 1px solid gray;</string>
          <width>81</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Affects the spacing of loot that drops [16-128].</string>
@@ -15694,6 +16436,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Affects how long items trashed by players remain on the ground.</string>
        </property>
@@ -15709,6 +16456,11 @@ border: 1px solid gray;</string>
          <width>81</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Affects how long items trashed by players remain on the ground.</string>
@@ -15729,6 +16481,11 @@ border: 1px solid gray;</string>
         <height>271</height>
        </rect>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -15745,6 +16502,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The amount of Gs new accounts will get when they log in for the first time.</string>
        </property>
@@ -15760,6 +16522,11 @@ color: white;</string>
          <width>101</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The amount of Gs new accounts will get when they log in for the first time.</string>
@@ -15779,6 +16546,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the page displayed on the Home tab.</string>
        </property>
@@ -15794,6 +16566,11 @@ border: 1px solid gray;</string>
          <width>111</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>URL for the page displayed on the Home tab.</string>
@@ -15813,6 +16590,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Heroes tab is selected.</string>
        </property>
@@ -15829,6 +16611,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Home tab is selected.</string>
        </property>
@@ -15844,6 +16631,11 @@ border: 1px solid gray;</string>
          <width>111</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Home tab is selected.</string>
@@ -15863,6 +16655,11 @@ border: 1px solid gray;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Heroes tab is selected.</string>
        </property>
@@ -15881,6 +16678,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Items tab is selected.</string>
        </property>
@@ -15897,6 +16699,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Costumes tab is selected.</string>
        </property>
@@ -15912,6 +16719,11 @@ border: 1px solid gray;</string>
          <width>111</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Costumes tab is selected.</string>
@@ -15930,6 +16742,11 @@ border: 1px solid gray;</string>
          <width>111</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The amount of Gs to display in the UI.</string>
@@ -15952,6 +16769,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Specials tab is selected.</string>
        </property>
@@ -15968,6 +16790,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Cards tab is selected.</string>
        </property>
@@ -15983,6 +16810,11 @@ border: 1px solid gray;</string>
          <width>111</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Cards tab is selected.</string>
@@ -16001,6 +16833,11 @@ border: 1px solid gray;</string>
          <width>111</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>URL for the top banner displayed when the Specials tab is selected.</string>
@@ -16023,6 +16860,11 @@ border: 1px solid gray;</string>
          <height>20</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the page displayed in the add G window.</string>
        </property>
@@ -16044,6 +16886,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>URL for the page displayed in the add G window.</string>
        </property>
@@ -16059,6 +16906,11 @@ border: 1px solid gray;</string>
          <width>181</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Loads CatalogPatch.json and merges its content with data loaded from Catalog.json.</string>
@@ -16079,6 +16931,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Enables custom in-game store URL overrides assigned below.</string>
        </property>
@@ -16098,6 +16955,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>The amount of Gs players will get for each Eternity Splinter when converting them.</string>
        </property>
@@ -16113,6 +16975,11 @@ border: 1px solid gray;</string>
          <width>101</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>The amount of Gs players will get for each Eternity Splinter when converting them.</string>
@@ -16466,6 +17333,11 @@ border: 1px solid gray;</string>
          </colorrole>
         </disabled>
        </palette>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="toolTip">
        <string>Restart the Server for changes to take effect.</string>
@@ -16825,6 +17697,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="toolTip">
        <string>Restart the Server for changes to take effect.</string>
       </property>
@@ -16842,6 +17719,11 @@ border: 1px solid gray;</string>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_3">
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+      </font>
+     </property>
      <attribute name="title">
       <string>Live Tuning</string>
      </attribute>
@@ -17187,6 +18069,11 @@ border: 1px solid gray;</string>
          </colorrole>
         </disabled>
        </palette>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="toolTip">
        <string>Sends the command so the current values are sent to the server.</string>
@@ -17546,6 +18433,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="toolTip">
        <string>Loads LiveTuningData.json</string>
       </property>
@@ -17903,6 +18795,11 @@ border: 1px solid gray;</string>
          </colorrole>
         </disabled>
        </palette>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="toolTip">
        <string>Save current settings to LiveTuningData.json</string>
@@ -18397,6 +19294,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -18412,6 +19314,11 @@ color: white;</string>
          <width>113</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Setting entry for the new data</string>
@@ -18431,6 +19338,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Setting Name</string>
        </property>
@@ -18444,6 +19356,11 @@ border: 1px solid gray;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Value</string>
        </property>
@@ -18456,6 +19373,11 @@ border: 1px solid gray;</string>
          <width>113</width>
          <height>20</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Default value for new setting.</string>
@@ -18674,6 +19596,11 @@ border: 1px solid gray;</string>
          </disabled>
         </palette>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>Adds a setting to livetuningdata.json</string>
        </property>
@@ -18697,6 +19624,11 @@ border: 1px solid gray;</string>
          <height>21</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Prototype</string>
        </property>
@@ -18709,6 +19641,11 @@ border: 1px solid gray;</string>
          <width>271</width>
          <height>21</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="toolTip">
         <string>Prototype for new entry.</string>
@@ -19063,6 +20000,11 @@ border: 1px solid gray;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: solid;
  background-color: lightgray;
@@ -19078,6 +20020,11 @@ border: 1px solid gray;</string>
         <width>611</width>
         <height>511</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
@@ -19095,6 +20042,11 @@ color: white;</string>
          <height>509</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <widget class="QWidget" name="liveTuningContainer" native="true">
         <property name="geometry">
          <rect>
@@ -19103,6 +20055,11 @@ color: white;</string>
           <width>611</width>
           <height>491</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <item>
@@ -19114,6 +20071,11 @@ color: white;</string>
      </widget>
     </widget>
     <widget class="QWidget" name="tab_4">
+     <property name="font">
+      <font>
+       <family>Times New Roman</family>
+      </font>
+     </property>
      <attribute name="title">
       <string>Events</string>
      </attribute>
@@ -19125,6 +20087,11 @@ color: white;</string>
         <width>231</width>
         <height>191</height>
        </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
       </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
@@ -19141,6 +20108,11 @@ color: white;</string>
          <width>201</width>
          <height>91</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string/>
@@ -19165,6 +20137,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="maximum">
         <number>1</number>
        </property>
@@ -19184,6 +20161,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Off</string>
        </property>
@@ -19196,6 +20178,11 @@ color: white;</string>
          <width>41</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string>On</string>
@@ -19410,6 +20397,11 @@ color: white;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -19426,6 +20418,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Off</string>
        </property>
@@ -19439,6 +20436,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>On</string>
        </property>
@@ -19451,6 +20453,11 @@ color: white;</string>
          <width>81</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="maximum">
         <number>1</number>
@@ -19470,6 +20477,11 @@ color: white;</string>
          <width>201</width>
          <height>91</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string/>
@@ -19694,6 +20706,11 @@ color: white;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -19710,6 +20727,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Off</string>
        </property>
@@ -19723,6 +20745,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>On</string>
        </property>
@@ -19735,6 +20762,11 @@ color: white;</string>
          <width>81</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="maximum">
         <number>1</number>
@@ -19754,6 +20786,11 @@ color: white;</string>
          <width>201</width>
          <height>91</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string/>
@@ -19978,6 +21015,11 @@ color: white;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -19994,6 +21036,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>Off</string>
        </property>
@@ -20007,6 +21054,11 @@ color: white;</string>
          <height>16</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="text">
         <string>On</string>
        </property>
@@ -20019,6 +21071,11 @@ color: white;</string>
          <width>81</width>
          <height>16</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="maximum">
         <number>1</number>
@@ -20038,6 +21095,11 @@ color: white;</string>
          <width>201</width>
          <height>91</height>
         </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
        </property>
        <property name="text">
         <string/>
@@ -20262,6 +21324,11 @@ color: white;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -20278,6 +21345,11 @@ color: white;</string>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Antman, Black Panther, Black Widow, Captain America, Doctor Strange, Hawkeye, Hulk, Ironman, Thor, Ms Marvel, Spiderman. &lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -20292,6 +21364,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20312,6 +21389,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20324,6 +21406,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -20339,6 +21426,11 @@ color: white;</string>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Daredevil, Iron Fist, Luke Cage, Punisher.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -20353,6 +21445,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20373,6 +21470,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20385,6 +21487,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -20400,6 +21507,11 @@ color: white;</string>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Human Torch, Invisible Woman, Mr Fantastic, Thing.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -20414,6 +21526,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20434,6 +21551,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20446,6 +21568,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -20461,6 +21588,11 @@ color: white;</string>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Angela, Ms Marvel, Nova, Rocket Raccoon, Silver Surfer, Star Lord.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -20475,6 +21607,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20495,6 +21632,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20507,6 +21649,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -20522,6 +21669,11 @@ color: white;</string>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Carnage, Dr Doom, Elektra, Green Goblin, Juggernaut, Magneto, Taskmaster, Ultron, Winter Soldier.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -20536,6 +21688,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20556,6 +21713,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20568,6 +21730,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -20583,6 +21750,11 @@ color: white;</string>
          <height>71</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="toolTip">
         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Beast, Cable, Colossus, Cyclops, Emma Frost, Gambit, Iceman, Jean Grey, Kitty Pryde, Magik, Nightcrawler, Psylocke, Rogue, Scarlet Witch, Storm, Wolverine, X23.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
        </property>
@@ -20597,6 +21769,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20617,6 +21794,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20629,6 +21811,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -20844,6 +22031,11 @@ color: white;</string>
         </disabled>
        </palette>
       </property>
+      <property name="font">
+       <font>
+        <family>Times New Roman</family>
+       </font>
+      </property>
       <property name="styleSheet">
        <string notr="true">background: transparent;
 color: white;</string>
@@ -20860,6 +22052,11 @@ color: white;</string>
          <height>101</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="title">
         <string>Event 1</string>
        </property>
@@ -20871,6 +22068,11 @@ color: white;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -20891,6 +22093,11 @@ color: white;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -20903,6 +22110,11 @@ color: white;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -21116,6 +22328,11 @@ color: white;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Folder where server is located</string>
         </property>
@@ -21135,6 +22352,11 @@ color: black;</string>
          <height>101</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="title">
         <string>Event 2</string>
        </property>
@@ -21146,6 +22368,11 @@ color: black;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -21166,6 +22393,11 @@ color: black;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -21178,6 +22410,11 @@ color: black;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -21391,6 +22628,11 @@ color: black;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Folder where server is located</string>
         </property>
@@ -21410,6 +22652,11 @@ color: black;</string>
          <height>101</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="title">
         <string>Event 3</string>
        </property>
@@ -21421,6 +22668,11 @@ color: black;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -21441,6 +22693,11 @@ color: black;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -21453,6 +22710,11 @@ color: black;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -21666,6 +22928,11 @@ color: black;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Folder where server is located</string>
         </property>
@@ -21685,6 +22952,11 @@ color: black;</string>
          <height>101</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="title">
         <string>Event 4</string>
        </property>
@@ -21696,6 +22968,11 @@ color: black;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -21716,6 +22993,11 @@ color: black;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -21728,6 +23010,11 @@ color: black;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -21941,6 +23228,11 @@ color: black;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Folder where server is located</string>
         </property>
@@ -21960,6 +23252,11 @@ color: black;</string>
          <height>101</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="title">
         <string>Event 5</string>
        </property>
@@ -21971,6 +23268,11 @@ color: black;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -21991,6 +23293,11 @@ color: black;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -22003,6 +23310,11 @@ color: black;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -22216,6 +23528,11 @@ color: black;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Folder where server is located</string>
         </property>
@@ -22235,6 +23552,11 @@ color: black;</string>
          <height>101</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="title">
         <string>Event 6</string>
        </property>
@@ -22246,6 +23568,11 @@ color: black;</string>
           <width>81</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="maximum">
          <number>1</number>
@@ -22266,6 +23593,11 @@ color: black;</string>
           <height>16</height>
          </rect>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="text">
          <string>Off</string>
         </property>
@@ -22278,6 +23610,11 @@ color: black;</string>
           <width>41</width>
           <height>16</height>
          </rect>
+        </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
         </property>
         <property name="text">
          <string>On</string>
@@ -22491,6 +23828,11 @@ color: black;</string>
           </disabled>
          </palette>
         </property>
+        <property name="font">
+         <font>
+          <family>Times New Roman</family>
+         </font>
+        </property>
         <property name="toolTip">
          <string>Folder where server is located</string>
         </property>
@@ -22510,6 +23852,11 @@ color: black;</string>
          <height>81</height>
         </rect>
        </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true"> color: white;
 </string>
@@ -22528,7 +23875,7 @@ color: black;</string>
      <x>0</x>
      <y>0</y>
      <width>1072</width>
-     <height>18</height>
+     <height>16</height>
     </rect>
    </property>
   </widget>
