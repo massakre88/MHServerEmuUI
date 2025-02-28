@@ -1,7 +1,6 @@
 <RCC>
     <qresource prefix="/images">
         <file alias="LunarNewYear">LunarNewYear.jpg</file>
-        <file alias="icon">icon.ico</file>
         <file alias="Background">background.jpg</file>
         <file alias="on">on.png</file>
         <file alias="off">off.png</file>
@@ -9,6 +8,7 @@
         <file alias="ArmorIncursion">armorEvent.jpg</file>
         <file alias="OdinsBounty">EventOdinsBounty.jpg</file>
         <file alias="MidtownMadness">EventMidtownMadness.jpg</file>
+        <file alias="icon">icon.ico</file>
     </qresource>
     <qresource prefix="/Fonts">
         <file>Segoe UI.ttf</file>

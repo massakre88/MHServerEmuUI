@@ -31,7 +31,7 @@ endif()
     ${PROJECT_SOURCES}
     resources.qrc
     ${APP_ICON_RESOURCE_WINDOWS} # Add the icon resource
-	)
+    )
 
 # Define target properties for Android with Qt 6 as:
 #    set_property(TARGET MHServerEmuUI APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
