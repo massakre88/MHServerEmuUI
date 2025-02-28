@@ -17086,6 +17086,7 @@ border: 1px solid gray;</string>
        <property name="font">
         <font>
          <family>Times New Roman</family>
+         <pointsize>8</pointsize>
         </font>
        </property>
        <property name="toolTip">
