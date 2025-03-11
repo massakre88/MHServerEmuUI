@@ -93,6 +93,9 @@ MainWindow::MainWindow(QWidget *parent)
     // Initialize event states based on LiveTuningData.json
     initializeEventStates();
 
+    // Make sure event files exist
+    verifyAndCopyEventFiles();
+
     connect(ui->pushButtonShutdown, &QPushButton::clicked, this, &MainWindow::onPushButtonShutdownClicked);
     connect(ui->loadLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onLoadLiveTuning);
     connect(ui->saveLiveTuningButton, &QPushButton::clicked, this, &MainWindow::onSaveLiveTuning);
@@ -1459,6 +1462,11 @@ void MainWindow::initializeEventStates() {
     ui->horizontalSliderOdinsBountySwitch->blockSignals(true);
     ui->horizontalSliderOdinsBountySwitch->setValue(odinsBountyState);
     ui->horizontalSliderOdinsBountySwitch->blockSignals(false);
+
+    int PandemoniumProtocolState = settings.value("PandemoniumProtocolEvent", 0).toInt();
+    ui->horizontalSliderPandemoniumProtocolSwitch->blockSignals(true);
+    ui->horizontalSliderPandemoniumProtocolSwitch->setValue(PandemoniumProtocolState);
+    ui->horizontalSliderPandemoniumProtocolSwitch->blockSignals(false);
 }
 
 void MainWindow::onEventSwitchChanged(const QString &eventName, int value) {
