@@ -85,6 +85,10 @@ private:
     void showUpdateLevelDialog(const QString &username);
     QString getEmailFromDatabase(const QString &username);
     QMap<QString, QPair<QString, QString>> userInfoMap;
+    void onPandemoniumProtocolToggle(int value);
+    void runPandemoniumProtocol();
+
+    QString currentSubEvent; // Tracks the currently active sub-event
 };
 
 #endif // MAINWINDOW_H

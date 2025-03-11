@@ -23,6 +23,7 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QFontDatabase>
+#include <QRandomGenerator>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -142,6 +143,9 @@ MainWindow::MainWindow(QWidget *parent)
     });
     connect(ui->horizontalSliderXmenXPSwitch, &QSlider::valueChanged, this, [this](int value) {
         onEventSwitchChanged("XMenXP", value);
+    });
+    connect(ui->horizontalSliderPandemoniumProtocolSwitch, &QSlider::valueChanged, this, [this](int value) {
+        onPandemoniumProtocolToggle(value);
     });
     connect(ui->pushButtonRefreshUsers, &QPushButton::clicked, this, &MainWindow::refreshLoggedInUsers);
     for (int i = 1; i <= 6; ++i) {
@@ -716,7 +720,9 @@ void MainWindow::verifyAndCopyEventFiles() {
         "LiveTuningData_Scoundrels&VillainsXP.json",
         "OFF_LiveTuningData_Scoundrels&VillainsXP.json",
         "LiveTuningData_XMenXP.json",
-        "OFF_LiveTuningData_XMenXP.json"
+        "OFF_LiveTuningData_XMenXP.json",
+        "OFF_LiveTuningDataz_PandemoniumProtocol.json",
+        "LiveTuningDataz_PandemoniumProtocol.json"
     };
 
     // Ensure the server folder exists
@@ -1141,6 +1147,8 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->lineEditQueueNumberOfPlayersInLine->setText(settings.value("PlayerManager/QueueNumberOfPlayersInLine", "").toString());
     ui->checkBoxShowNewsOnLogin->setChecked(settings.value("PlayerManager/ShowNewsOnLogin", false).toBool());
     ui->lineEditNewsUrl->setText(settings.value("PlayerManager/NewsUrl", "").toString());
+    ui->lineEditGameInstanceCount->setText(settings.value("PlayerManager/GameInstanceCount", "").toString());
+    ui->lineEditPlayerCountDivisor->setText(settings.value("PlayerManager/PlayerCountDivisor", "").toString());
 
     // Load SQLiteDBManager
     ui->lineEditSQLiteFileName->setText(settings.value("SQLiteDBManager/FileName", "").toString());
@@ -1266,6 +1274,8 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"PlayerManager/QueueNumberOfPlayersInLine", ui->lineEditQueueNumberOfPlayersInLine->text()},
         {"PlayerManager/ShowNewsOnLogin", ui->checkBoxShowNewsOnLogin->isChecked() ? "true" : "false"},
         {"PlayerManager/NewsUrl", ui->lineEditNewsUrl->text()},
+        {"PlayerManager/GameInstanceCount", ui->lineEditGameInstanceCount->text()},
+        {"PlayerManager/PlayerCountDivisor", ui->lineEditPlayerCountDivisor->text()},
         {"SQLiteDBManager/FileName", ui->lineEditSQLiteFileName->text()},
         {"SQLiteDBManager/MaxBackupNumber", ui->lineEditSQLiteMaxBackupNumber->text()},
         {"SQLiteDBManager/BackupIntervalMinutes", ui->lineEditSQLiteBackupIntervalMinutes->text()},
@@ -1814,4 +1824,171 @@ QString MainWindow::getEmailFromDatabase(const QString &username) {
 
     qDebug() << "No email found for PlayerName:" << username;
     return QString();
+}
+
+void MainWindow::onPandemoniumProtocolToggle(int value) {
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString activeFilePath = serverPath + "LiveTuningDataz_PandemoniumProtocol.json";
+    QString inactiveFilePath = serverPath + "OFF_LiveTuningDataz_PandemoniumProtocol.json";
+
+    QFile activeFile(activeFilePath);
+    QFile inactiveFile(inactiveFilePath);
+
+    if (value == 1) {
+        // Enable event: Rename OFF_ file to active file
+        if (!inactiveFile.exists()) {
+            QMessageBox::warning(this, "Error", "Pandemonium Protocol file not found!");
+            return;
+        }
+        if (!inactiveFile.rename(activeFilePath)) {
+            QMessageBox::critical(this, "Error", "Failed to activate Pandemonium Protocol.");
+            return;
+        }
+
+        qDebug() << "Pandemonium Protocol enabled.";
+        runPandemoniumProtocol(); // Start the event cycle
+
+    } else {
+        // Disable event: Rename active file to OFF_ file
+        if (!activeFile.exists()) {
+            QMessageBox::warning(this, "Error", "Pandemonium Protocol file not found!");
+            return;
+        }
+        if (!activeFile.rename(inactiveFilePath)) {
+            QMessageBox::critical(this, "Error", "Failed to deactivate Pandemonium Protocol.");
+            return;
+        }
+
+        qDebug() << "Pandemonium Protocol disabled.";
+    }
+}
+
+void MainWindow::runPandemoniumProtocol() {
+    QString filePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningDataz_PandemoniumProtocol.json";
+    QFile file(filePath);
+
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Failed to open Pandemonium Protocol file.");
+        return;
+    }
+
+    QJsonDocument doc = QJsonDocument::fromJson(file.readAll());
+    file.close();
+
+    if (!doc.isArray()) {
+        QMessageBox::critical(this, "Error", "Invalid JSON format in Pandemonium Protocol file.");
+        return;
+    }
+
+    QJsonArray dataArray = doc.array();
+    QMap<QString, QString> settingNames = {
+        {"eGTV_VendorXPGain", "Vendor XP"},
+        {"eGTV_XPGain", "XP Boost"},
+        {"eGTV_LootSpecialDropRate", "SiF"},
+        {"eGTV_LootRarity", "RiF"}
+    };
+
+    // Get min/max values from line edits, ensuring min is less than max
+    double minBoost = ui->LineEditPandemoniumBoostRangeMin->text().toDouble();
+    double maxBoost = ui->LineEditPandemoniumBoostRangeMax->text().toDouble();
+
+    if (minBoost > maxBoost) {
+        std::swap(minBoost, maxBoost); // Ensure valid range
+    }
+
+    QStringList broadcastParts;
+    bool detailedBroadcast = ui->checkBoxPandemoniumBroadcast->isChecked();
+
+    if (detailedBroadcast) {
+        broadcastParts << "The Pandemonium shifts!";
+    } else {
+        broadcastParts << "The chaos shifts once more...";
+    }
+
+    for (int i = 0; i < dataArray.size(); ++i) {
+        QJsonObject obj = dataArray[i].toObject();
+        QString settingKey = obj["Setting"].toString();
+
+        if (settingNames.contains(settingKey)) {
+            double randomValue = minBoost + QRandomGenerator::global()->bounded(maxBoost - minBoost);
+            randomValue = QString::number(randomValue, 'f', 2).toDouble(); // Keep 2 decimal places
+
+            obj["Value"] = randomValue;
+            dataArray[i] = obj;
+
+            if (detailedBroadcast) {
+                broadcastParts << QString("%1: %2x").arg(settingNames[settingKey]).arg(randomValue, 0, 'f', 2);
+            }
+        }
+    }
+
+    // Save updated JSON
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Failed to save updated Pandemonium Protocol file.");
+        return;
+    }
+    doc.setArray(dataArray);
+    file.write(doc.toJson(QJsonDocument::Indented));
+    file.close();
+
+    // Pick a random sub-event (1-4 for an event, 5 for none)
+    static QStringList subEvents = {
+        "ArmorIncursion",
+        "CosmicChaos",
+        "MidtownMadness",
+        "OdinsBounty"
+    };
+
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+
+    if (!currentSubEvent.isEmpty()) {
+        QString activePath = serverPath + "LiveTuningData_" + currentSubEvent + ".json";
+        QString inactivePath = serverPath + "OFF_LiveTuningData_" + currentSubEvent + ".json";
+
+        QFile activeFile(activePath);
+        if (activeFile.exists()) {
+            activeFile.rename(inactivePath);
+        }
+        currentSubEvent.clear();
+    }
+
+    int roll = QRandomGenerator::global()->bounded(1, 6);
+    if (roll <= 4) {
+        currentSubEvent = subEvents[roll - 1];
+        QString activePath = serverPath + "LiveTuningData_" + currentSubEvent + ".json";
+        QString inactivePath = serverPath + "OFF_LiveTuningData_" + currentSubEvent + ".json";
+
+        QFile inactiveFile(inactivePath);
+        if (inactiveFile.exists()) {
+            inactiveFile.rename(activePath);
+            if (detailedBroadcast) {
+                broadcastParts << QString("Bonus Event: %1!").arg(currentSubEvent);
+            }
+        }
+    } else if (detailedBroadcast) {
+        broadcastParts << "No additional event this time...";
+    }
+
+    // Reload live tuning and broadcast
+    if (serverProcess->state() == QProcess::Running) {
+        serverProcess->write("!server reloadlivetuning\n");
+        ui->ServerOutputEdit->append("Sent command: !server reloadlivetuning");
+
+        QString broadcastMessage = broadcastParts.join(" ");
+        serverProcess->write(QString("!server broadcast %1\n").arg(broadcastMessage).toUtf8());
+        ui->ServerOutputEdit->append("Sent broadcast: " + broadcastMessage);
+    }
+
+    // Get min/max duration from line edits, ensuring min < max
+    int minDuration = ui->LineEditPandemoniumDurationMin->text().toInt();
+    int maxDuration = ui->LineEditPandemoniumDurationMax->text().toInt();
+
+    if (minDuration > maxDuration) {
+        std::swap(minDuration, maxDuration);
+    }
+
+    int durationMinutes = QRandomGenerator::global()->bounded(minDuration, maxDuration + 1);
+    int durationMs = durationMinutes * 60 * 1000;
+
+    QTimer::singleShot(durationMs, this, &MainWindow::runPandemoniumProtocol);
 }

@@ -9,6 +9,7 @@
         <file alias="OdinsBounty">EventOdinsBounty.jpg</file>
         <file alias="MidtownMadness">EventMidtownMadness.jpg</file>
         <file alias="icon">icon.ico</file>
+        <file alias="PademoniumProtocol">EventPandemoniumProtocol.jpg</file>
     </qresource>
     <qresource prefix="/Fonts">
         <file>Segoe UI.ttf</file>
