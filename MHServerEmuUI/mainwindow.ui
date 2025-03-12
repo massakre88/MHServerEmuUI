@@ -34,7 +34,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>MHServerEmuUI</string>
+   <string>MHServerEmuUI v0.2.2</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
