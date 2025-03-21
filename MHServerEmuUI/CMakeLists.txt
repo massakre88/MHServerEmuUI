@@ -8,6 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS_RELEASE "-O1")
 
 # Find required Qt components
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets Sql) # Added Sql here

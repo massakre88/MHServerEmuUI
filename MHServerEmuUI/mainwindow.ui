@@ -34,7 +34,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>MHServerEmuUI v0.2.2</string>
+   <string>MHServerEmuUI v0.2.3</string>
   </property>
   <property name="windowIcon">
    <iconset resource="resources.qrc">
@@ -16971,7 +16971,7 @@ border: 1px solid gray;</string>
         <x>740</x>
         <y>0</y>
         <width>321</width>
-        <height>151</height>
+        <height>181</height>
        </rect>
       </property>
       <property name="font">
@@ -16990,7 +16990,7 @@ color: white;</string>
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>20</y>
+         <y>50</y>
          <width>81</width>
          <height>20</height>
         </rect>
@@ -17013,7 +17013,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>40</y>
+         <y>70</y>
          <width>81</width>
          <height>20</height>
         </rect>
@@ -17036,7 +17036,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>20</y>
+         <y>50</y>
          <width>261</width>
          <height>16</height>
         </rect>
@@ -17057,7 +17057,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>40</y>
+         <y>70</y>
          <width>211</width>
          <height>16</height>
         </rect>
@@ -17078,7 +17078,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>60</y>
+         <y>90</y>
          <width>261</width>
          <height>21</height>
         </rect>
@@ -17102,7 +17102,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>80</y>
+         <y>110</y>
          <width>221</width>
          <height>21</height>
         </rect>
@@ -17126,7 +17126,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>100</y>
+         <y>130</y>
          <width>211</width>
          <height>21</height>
         </rect>
@@ -17147,7 +17147,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>100</y>
+         <y>130</y>
          <width>81</width>
          <height>20</height>
         </rect>
@@ -17170,7 +17170,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>10</x>
-         <y>120</y>
+         <y>150</y>
          <width>211</width>
          <height>21</height>
         </rect>
@@ -17192,7 +17192,7 @@ border: 1px solid gray;</string>
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>120</y>
+         <y>150</y>
          <width>81</width>
          <height>20</height>
         </rect>
@@ -17211,12 +17211,60 @@ color:black;
 border: 1px solid gray;</string>
        </property>
       </widget>
+      <widget class="QCheckBox" name="checkBoxAutoUnlockAvatars">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>10</y>
+         <width>221</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Automatically unlocks all avatars for players who have finished the tutorial.</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: solid;</string>
+       </property>
+       <property name="text">
+        <string>AutoUnlockAvatars</string>
+       </property>
+      </widget>
+      <widget class="QCheckBox" name="checkBoxAutoUnlockTeamUps">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>30</y>
+         <width>221</width>
+         <height>21</height>
+        </rect>
+       </property>
+       <property name="font">
+        <font>
+         <family>Times New Roman</family>
+        </font>
+       </property>
+       <property name="toolTip">
+        <string>Automatically unlocks all team-ups for players who have finished the tutorial.</string>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">background: solid;</string>
+       </property>
+       <property name="text">
+        <string>AutoUnlockTeamUps</string>
+       </property>
+      </widget>
      </widget>
      <widget class="QGroupBox" name="groupBoxBilling">
       <property name="geometry">
        <rect>
         <x>740</x>
-        <y>150</y>
+        <y>190</y>
         <width>321</width>
         <height>271</height>
        </rect>

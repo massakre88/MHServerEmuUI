@@ -1196,6 +1196,8 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->checkBoxOrbisTrophiesEnabled->setChecked(settings.value("GameOptions/OrbisTrophiesEnabled", false).toBool());
 
     // Load CustomGameOptions settings
+    ui->checkBoxAutoUnlockAvatars->setChecked(settings.value("CustomGameOptions/AutoUnlockAvatars", false).toBool());
+    ui->checkBoxAutoUnlockTeamUps->setChecked(settings.value("CustomGameOptions/AutoUnlockTeamUps", false).toBool());
     ui->lineEditRegionCleanupIntervalMS->setText(settings.value("CustomGameOptions/RegionCleanupIntervalMS", "").toString());
     ui->lineEditRegionUnvisitedThresholdMS->setText(settings.value("CustomGameOptions/RegionUnvisitedThresholdMS", "").toString());
     ui->checkBoxDisableMovementPowerChargeCost->setChecked(settings.value("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
@@ -1311,6 +1313,8 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"GameOptions/ChatBanVoteLoginCountRequired", ui->lineEditChatBanVoteLoginCountRequired->text()},
         {"GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked() ? "true" : "false"},
         {"GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/AutoUnlockAvatars", ui->checkBoxAutoUnlockAvatars->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/AutoUnlockTeamUps", ui->checkBoxAutoUnlockTeamUps->isChecked() ? "true" : "false"},
         {"CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text()},
         {"CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text()},
         {"CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked() ? "true" : "false"},
