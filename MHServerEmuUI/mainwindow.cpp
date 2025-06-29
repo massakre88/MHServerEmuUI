@@ -1143,7 +1143,6 @@ void MainWindow::onPushButtonLoadConfigClicked()
 
     // Load PlayerManager settings
     ui->checkBoxUseJsonDBManager->setChecked(settings.value("PlayerManager/UseJsonDBManager", false).toBool());
-    ui->checkBoxIgnoreSessionToken->setChecked(settings.value("PlayerManager/IgnoreSessionToken", false).toBool());
     ui->checkBoxAllowClientVersionMismatch->setChecked(settings.value("PlayerManager/AllowClientVersionMismatch", false).toBool());
     ui->checkBoxSimulateQueue->setChecked(settings.value("PlayerManager/SimulateQueue", false).toBool());
     ui->lineEditQueuePlaceInLine->setText(settings.value("PlayerManager/QueueNumberOfPlayersInLine", "").toString());
@@ -1172,6 +1171,7 @@ void MainWindow::onPushButtonLoadConfigClicked()
     // Load GameData settings
     ui->checkBoxLoadAllPrototypes->setChecked(settings.value("GameData/LoadAllPrototypes", false).toBool());
     ui->checkBoxUseEquipmentSlotTableCache->setChecked(settings.value("GameData/UseEquipmentSlotTableCache", false).toBool());
+    ui->checkBoxEnablePatchManager->setChecked(settings.value("GameData/EnablePatchManager", false).toBool());
 
     // Load GameOptions settings
     ui->checkBoxTeamUpSystemEnabled->setChecked(settings.value("GameOptions/TeamUpSystemEnabled", false).toBool());
@@ -1196,14 +1196,19 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->checkBoxOrbisTrophiesEnabled->setChecked(settings.value("GameOptions/OrbisTrophiesEnabled", false).toBool());
 
     // Load CustomGameOptions settings
+    ui->lineEditESCooldownOverrideMinutes->setText(settings.value("CustomGameOptions/ESCooldownOverrideMinutes", "").toString());
     ui->checkBoxAutoUnlockAvatars->setChecked(settings.value("CustomGameOptions/AutoUnlockAvatars", false).toBool());
     ui->checkBoxAutoUnlockTeamUps->setChecked(settings.value("CustomGameOptions/AutoUnlockTeamUps", false).toBool());
     ui->lineEditRegionCleanupIntervalMS->setText(settings.value("CustomGameOptions/RegionCleanupIntervalMS", "").toString());
     ui->lineEditRegionUnvisitedThresholdMS->setText(settings.value("CustomGameOptions/RegionUnvisitedThresholdMS", "").toString());
     ui->checkBoxDisableMovementPowerChargeCost->setChecked(settings.value("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
+    ui->checkBoxAllowSameGroupTalents->setChecked(settings.value("CustomGameOptions/AllowSameGroupTalents", false).toBool());
     ui->checkBoxDisableInstancedLoot->setChecked(settings.value("CustomGameOptions/DisableInstancedLoot", false).toBool());
     ui->lineEditLootSpawnGridCellRadius->setText(settings.value("CustomGameOptions/LootSpawnGridCellRadius", "").toString());
     ui->lineEditTrashedItemExpirationTimeMultiplier->setText(settings.value("CustomGameOptions/TrashedItemExpirationTimeMultiplier", "").toString());
+    ui->checkBoxDisableAccountBinding->setChecked(settings.value("CustomGameOptions/DisableAccountBinding", false).toBool());
+    ui->checkBoxDisableCharacterBinding->setChecked(settings.value("CustomGameOptions/DisableCharacterBinding", false).toBool());
+    ui->checkBoxUsePrestigeLootTable->setChecked(settings.value("CustomGameOptions/UsePrestigeLootTable", false).toBool());
 
     // Load Billing settings
     ui->lineEditGazillioniteBalanceForNewAccounts->setText(settings.value("Billing/GazillioniteBalanceForNewAccounts", "").toString());
@@ -1218,6 +1223,11 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->lineEditStoreChestsBannerPageUrl->setText(settings.value("Billing/StoreChestsBannerPageUrl", "").toString());
     ui->lineEditStoreSpecialsBannerPageUrl->setText(settings.value("Billing/StoreSpecialsBannerPageUrl", "").toString());
     ui->lineEditStoreRealMoneyUrl->setText(settings.value("Billing/StoreRealMoneyUrl", "").toString());
+
+    // Load Leaderboard settings
+    ui->lineEditDatabaseFile->setText(settings.value("Leaderboards/DatabaseFile", "").toString());
+    ui->lineEditScheduleFile->setText(settings.value("Leaderboards/ScheduleFile", "").toString());
+    ui->lineEditAutoSaveIntervalMinutes->setText(settings.value("Leaderboards/AutoSaveIntervalMinutes", "").toString());
 
     // Enable all group boxes
     ui->groupBoxLogging->setEnabled(true);
@@ -1272,7 +1282,6 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Auth/Port", ui->lineEditAuthPort->text()},
         {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
         {"PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked() ? "true" : "false"},
-        {"PlayerManager/IgnoreSessionToken", ui->checkBoxIgnoreSessionToken->isChecked() ? "true" : "false"},
         {"PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked() ? "true" : "false"},
         {"PlayerManager/SimulateQueue", ui->checkBoxSimulateQueue->isChecked() ? "true" : "false"},
         {"PlayerManager/QueuePlaceInLine", ui->lineEditQueuePlaceInLine->text()},
@@ -1293,6 +1302,7 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"GroupingManager/MotdPrestigeLevel", QString::number(ui->comboBoxMotdPrestigeLevel->currentIndex())},
         {"GameData/LoadAllPrototypes", ui->checkBoxLoadAllPrototypes->isChecked() ? "true" : "false"},
         {"GameData/UseEquipmentSlotTableCache", ui->checkBoxUseEquipmentSlotTableCache->isChecked() ? "true" : "false"},
+        {"GameData/EnablePatchManager", ui->checkBoxEnablePatchManager->isChecked() ? "true" : "false"},
         {"GameOptions/TeamUpSystemEnabled", ui->checkBoxTeamUpSystemEnabled->isChecked() ? "true" : "false"},
         {"GameOptions/AchievementsEnabled", ui->checkBoxAchievementsEnabled->isChecked() ? "true" : "false"},
         {"GameOptions/OmegaMissionsEnabled", ui->checkBoxOmegaMissionsEnabled->isChecked() ? "true" : "false"},
@@ -1313,14 +1323,19 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"GameOptions/ChatBanVoteLoginCountRequired", ui->lineEditChatBanVoteLoginCountRequired->text()},
         {"GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked() ? "true" : "false"},
         {"GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/ESCooldownOverrideMinutes", ui->lineEditESCooldownOverrideMinutes->text()},
         {"CustomGameOptions/AutoUnlockAvatars", ui->checkBoxAutoUnlockAvatars->isChecked() ? "true" : "false"},
         {"CustomGameOptions/AutoUnlockTeamUps", ui->checkBoxAutoUnlockTeamUps->isChecked() ? "true" : "false"},
         {"CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text()},
         {"CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text()},
         {"CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/AllowSameGroupTalents", ui->checkBoxAllowSameGroupTalents->isChecked() ? "true" : "false"},
         {"CustomGameOptions/DisableInstancedLoot", ui->checkBoxDisableInstancedLoot->isChecked() ? "true" : "false"},
         {"CustomGameOptions/LootSpawnGridCellRadius", ui->lineEditLootSpawnGridCellRadius->text()},
         {"CustomGameOptions/TrashedItemExpirationTimeMultiplier", ui->lineEditTrashedItemExpirationTimeMultiplier->text()},
+        {"CustomGameOptions/DisableAccountBinding", ui->checkBoxDisableAccountBinding->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/DisableCharacterBinding", ui->checkBoxDisableCharacterBinding->isChecked() ? "true" : "false"},
+        {"CustomGameOptions/UsePrestigeLootTable", ui->checkBoxUsePrestigeLootTable->isChecked() ? "true" : "false"},
         {"Billing/GazillioniteBalanceForNewAccounts", ui->lineEditGazillioniteBalanceForNewAccounts->text()},
         {"Billing/ESToGazillioniteConversionRatio", ui->lineEditESToGazillioniteConversionRatio->text()},
         {"Billing/ApplyCatalogPatch", ui->checkBoxApplyCatalogPatch->isChecked() ? "true" : "false"},
@@ -1333,6 +1348,9 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Billing/StoreChestsBannerPageUrl", ui->lineEditStoreChestsBannerPageUrl->text()},
         {"Billing/StoreSpecialsBannerPageUrl", ui->lineEditStoreSpecialsBannerPageUrl->text()},
         {"Billing/StoreRealMoneyUrl", ui->lineEditStoreRealMoneyUrl->text()},
+        {"Leaderboards/DatabaseFile", ui->lineEditDatabaseFile->text()},
+        {"Leaderboards/ScheduleFile", ui->lineEditScheduleFile->text()},
+        {"Leaderboards/AutoSaveIntervalMinutes", ui->lineEditAutoSaveIntervalMinutes->text()},
     };
 
     // Modify the settings in the existing lines while keeping comments
