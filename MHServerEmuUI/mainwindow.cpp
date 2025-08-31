@@ -1122,6 +1122,7 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->checkBoxConsoleIncludeTimestamps->setChecked(settings.value("Logging/ConsoleIncludeTimestamps", false).toBool());
     ui->comboBoxConsoleMinLevel->setCurrentIndex(settings.value("Logging/ConsoleMinLevel", 0).toInt());
     ui->comboBoxConsoleMaxLevel->setCurrentIndex(settings.value("Logging/ConsoleMaxLevel", 5).toInt());
+    ui->lineEditConsoleChannels->setText(settings.value("Logging/ConsoleChannels", "").toString());
     ui->checkBoxEnableFile->setChecked(settings.value("Logging/EnableFile", false).toBool());
     ui->checkBoxFileIncludeTimestamps->setChecked(settings.value("Logging/FileIncludeTimestamps", false).toBool());
     ui->comboBoxFileMinLevel->setCurrentIndex(settings.value("Logging/FileMinLevel", 0).toInt());
@@ -1142,15 +1143,14 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->checkBoxEnableWebApi->setChecked(settings.value("Auth/EnableWebApi", false).toBool());
 
     // Load PlayerManager settings
+    ui->checkBoxEnablePersistence->setChecked(settings.value("PlayerManager/EnablePersistence", false).toBool());
     ui->checkBoxUseJsonDBManager->setChecked(settings.value("PlayerManager/UseJsonDBManager", false).toBool());
     ui->checkBoxAllowClientVersionMismatch->setChecked(settings.value("PlayerManager/AllowClientVersionMismatch", false).toBool());
-    ui->checkBoxSimulateQueue->setChecked(settings.value("PlayerManager/SimulateQueue", false).toBool());
-    ui->lineEditQueuePlaceInLine->setText(settings.value("PlayerManager/QueueNumberOfPlayersInLine", "").toString());
-    ui->lineEditQueueNumberOfPlayersInLine->setText(settings.value("PlayerManager/QueueNumberOfPlayersInLine", "").toString());
+    ui->checkBoxUseWhitelist->setChecked(settings.value("PlayerManager/UseWhitelist", false).toBool());
     ui->checkBoxShowNewsOnLogin->setChecked(settings.value("PlayerManager/ShowNewsOnLogin", false).toBool());
     ui->lineEditNewsUrl->setText(settings.value("PlayerManager/NewsUrl", "").toString());
-    ui->lineEditGameInstanceCount->setText(settings.value("PlayerManager/GameInstanceCount", "").toString());
-    ui->lineEditPlayerCountDivisor->setText(settings.value("PlayerManager/PlayerCountDivisor", "").toString());
+    ui->lineEditServerCapacity->setText(settings.value("PlayerManager/ServerCapacity", "").toString());
+    ui->lineEditMaxLoginQueueClients->setText(settings.value("PlayerManager/MaxLoginQueueClients", "").toString());
 
     // Load SQLiteDBManager
     ui->lineEditSQLiteFileName->setText(settings.value("SQLiteDBManager/FileName", "").toString());
@@ -1164,9 +1164,12 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->lineEditJsonPlayerName->setText(settings.value("JsonDBManager/PlayerName", "").toString());
 
     // Load GroupingManager settings
-    ui->lineEditMotdPlayerName->setText(settings.value("GroupingManager/MotdPlayerName", "").toString());
+    ui->lineEditServerName->setText(settings.value("GroupingManager/ServerName", "").toString());
     ui->textEditMotdText->setPlainText(settings.value("GroupingManager/MotdText", "").toString());
-    ui->comboBoxMotdPrestigeLevel->setCurrentIndex(settings.value("GroupingManager/MotdPrestigeLevel", 0).toInt());
+    ui->comboBoxServerPrestigeLevel->setCurrentIndex(settings.value("GroupingManager/ServerPrestigeLevel", 0).toInt());
+
+    // Load GameInstance settings
+    ui->lineEditNumWorkerThreads->setText(settings.value("GameInstance/NumWorkerThreads", "").toString());
 
     // Load GameData settings
     ui->checkBoxLoadAllPrototypes->setChecked(settings.value("GameData/LoadAllPrototypes", false).toBool());
@@ -1197,10 +1200,9 @@ void MainWindow::onPushButtonLoadConfigClicked()
 
     // Load CustomGameOptions settings
     ui->lineEditESCooldownOverrideMinutes->setText(settings.value("CustomGameOptions/ESCooldownOverrideMinutes", "").toString());
+    ui->checkBoxCombineESStacks->setChecked(settings.value("CustomGameOptions/CombineESStacks", false).toBool());
     ui->checkBoxAutoUnlockAvatars->setChecked(settings.value("CustomGameOptions/AutoUnlockAvatars", false).toBool());
     ui->checkBoxAutoUnlockTeamUps->setChecked(settings.value("CustomGameOptions/AutoUnlockTeamUps", false).toBool());
-    ui->lineEditRegionCleanupIntervalMS->setText(settings.value("CustomGameOptions/RegionCleanupIntervalMS", "").toString());
-    ui->lineEditRegionUnvisitedThresholdMS->setText(settings.value("CustomGameOptions/RegionUnvisitedThresholdMS", "").toString());
     ui->checkBoxDisableMovementPowerChargeCost->setChecked(settings.value("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
     ui->checkBoxAllowSameGroupTalents->setChecked(settings.value("CustomGameOptions/AllowSameGroupTalents", false).toBool());
     ui->checkBoxDisableInstancedLoot->setChecked(settings.value("CustomGameOptions/DisableInstancedLoot", false).toBool());
@@ -1268,6 +1270,8 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Logging/ConsoleIncludeTimestamps", ui->checkBoxConsoleIncludeTimestamps->isChecked() ? "true" : "false"},
         {"Logging/ConsoleMinLevel", QString::number(ui->comboBoxConsoleMinLevel->currentIndex())},
         {"Logging/ConsoleMaxLevel", QString::number(ui->comboBoxConsoleMaxLevel->currentIndex())},
+        {"Logging/ConsoleChannels", ui->lineEditConsoleChannels->text()},
+        {"Logging/EnableFile", ui->checkBoxEnableFile->isChecked() ? "true" : "false"},
         {"Logging/FileIncludeTimestamps", ui->checkBoxFileIncludeTimestamps->isChecked() ? "true" : "false"},
         {"Logging/FileMinLevel", QString::number(ui->comboBoxFileMinLevel->currentIndex())},
         {"Logging/FileMaxLevel", QString::number(ui->comboBoxFileMaxLevel->currentIndex())},
@@ -1281,15 +1285,14 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Auth/Address", ui->lineEditAuthAddress->text()},
         {"Auth/Port", ui->lineEditAuthPort->text()},
         {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
+        {"PlayerManager/EnablePersistence", ui->checkBoxEnablePersistence->isChecked() ? "true" : "false"},
         {"PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked() ? "true" : "false"},
         {"PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked() ? "true" : "false"},
-        {"PlayerManager/SimulateQueue", ui->checkBoxSimulateQueue->isChecked() ? "true" : "false"},
-        {"PlayerManager/QueuePlaceInLine", ui->lineEditQueuePlaceInLine->text()},
-        {"PlayerManager/QueueNumberOfPlayersInLine", ui->lineEditQueueNumberOfPlayersInLine->text()},
+        {"PlayerManager/UseWhitelist", ui->checkBoxUseWhitelist->isChecked() ? "true" : "false"},
         {"PlayerManager/ShowNewsOnLogin", ui->checkBoxShowNewsOnLogin->isChecked() ? "true" : "false"},
         {"PlayerManager/NewsUrl", ui->lineEditNewsUrl->text()},
-        {"PlayerManager/GameInstanceCount", ui->lineEditGameInstanceCount->text()},
-        {"PlayerManager/PlayerCountDivisor", ui->lineEditPlayerCountDivisor->text()},
+        {"PlayerManager/ServerCapacity", ui->lineEditServerCapacity->text()},
+        {"PlayerManager/MaxLoginQueueClients", ui->lineEditMaxLoginQueueClients->text()},
         {"SQLiteDBManager/FileName", ui->lineEditSQLiteFileName->text()},
         {"SQLiteDBManager/MaxBackupNumber", ui->lineEditSQLiteMaxBackupNumber->text()},
         {"SQLiteDBManager/BackupIntervalMinutes", ui->lineEditSQLiteBackupIntervalMinutes->text()},
@@ -1297,9 +1300,11 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"JsonDBManager/MaxBackupNumber", ui->lineEditJsonMaxBackupNumber->text()},
         {"JsonDBManager/BackupIntervalMinutes", ui->lineEditJsonBackupIntervalMinutes->text()},
         {"JsonDBManager/PlayerName", ui->lineEditJsonPlayerName->text()},
-        {"GroupingManager/MotdPlayerName", ui->lineEditMotdPlayerName->text()},
+        {"GroupingManager/ServerName", ui->lineEditServerName->text()},
         {"GroupingManager/MotdText", ui->textEditMotdText->toPlainText()},
-        {"GroupingManager/MotdPrestigeLevel", QString::number(ui->comboBoxMotdPrestigeLevel->currentIndex())},
+        {"GroupingManager/ServerPrestigeLevel", QString::number(ui->comboBoxServerPrestigeLevel->currentIndex())},
+        {"GroupingManager/LogTells", ui->checkBoxLogTells->isChecked() ? "true" : "false"},
+        {"GameInstance/NumWorkerThreads", ui->lineEditNumWorkerThreads->text()},
         {"GameData/LoadAllPrototypes", ui->checkBoxLoadAllPrototypes->isChecked() ? "true" : "false"},
         {"GameData/UseEquipmentSlotTableCache", ui->checkBoxUseEquipmentSlotTableCache->isChecked() ? "true" : "false"},
         {"GameData/EnablePatchManager", ui->checkBoxEnablePatchManager->isChecked() ? "true" : "false"},
@@ -1324,10 +1329,9 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"GameOptions/IsDifficultySliderEnabled", ui->checkBoxIsDifficultySliderEnabled->isChecked() ? "true" : "false"},
         {"GameOptions/OrbisTrophiesEnabled", ui->checkBoxOrbisTrophiesEnabled->isChecked() ? "true" : "false"},
         {"CustomGameOptions/ESCooldownOverrideMinutes", ui->lineEditESCooldownOverrideMinutes->text()},
+        {"CustomGameOptions/CombineESStacks", ui->checkBoxCombineESStacks->isChecked() ? "true" : "false"},
         {"CustomGameOptions/AutoUnlockAvatars", ui->checkBoxAutoUnlockAvatars->isChecked() ? "true" : "false"},
         {"CustomGameOptions/AutoUnlockTeamUps", ui->checkBoxAutoUnlockTeamUps->isChecked() ? "true" : "false"},
-        {"CustomGameOptions/RegionCleanupIntervalMS", ui->lineEditRegionCleanupIntervalMS->text()},
-        {"CustomGameOptions/RegionUnvisitedThresholdMS", ui->lineEditRegionUnvisitedThresholdMS->text()},
         {"CustomGameOptions/DisableMovementPowerChargeCost", ui->checkBoxDisableMovementPowerChargeCost->isChecked() ? "true" : "false"},
         {"CustomGameOptions/AllowSameGroupTalents", ui->checkBoxAllowSameGroupTalents->isChecked() ? "true" : "false"},
         {"CustomGameOptions/DisableInstancedLoot", ui->checkBoxDisableInstancedLoot->isChecked() ? "true" : "false"},
