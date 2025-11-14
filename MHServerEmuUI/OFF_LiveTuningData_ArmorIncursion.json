@@ -773,5 +773,10 @@
         "Prototype": "Events/GlobalEvents/EventPowerConditions/ARMOREventPowerCondition.prototype",
         "Setting": "eCTV_Enabled",
         "Value": 2
+    },
+    {
+        "Prototype": "Loot/Tables/Mob/Bosses/EventPowerUpTable.prototype",
+        "Setting": "eLTTV_Enabled",
+        "Value": 2
     }
 ]

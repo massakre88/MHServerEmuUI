@@ -697,7 +697,7 @@ void MainWindow::onDownloadFinished(QNetworkReply *reply) {
 
 void MainWindow::verifyAndCopyEventFiles() {
     // Define the server's LiveTuning folder
-    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuning/";
 
     // Define the source folder (where the program's EXE is located)
     QString sourcePath = QCoreApplication::applicationDirPath() + "/";
@@ -764,7 +764,7 @@ void MainWindow::onLoadLiveTuning()
     }
 
     // Construct the full path to livetuningdata.json
-    QString filePath = QDir(mhServerPath).filePath("MHServerEmu/Data/Game/LiveTuningData.json");
+    QString filePath = QDir(mhServerPath).filePath("MHServerEmu/Data/Game/LiveTuning/LiveTuningData.json");
 
     QFile file(filePath);
     if (!file.open(QIODevice::ReadOnly)) {
@@ -959,7 +959,7 @@ void MainWindow::createLiveTuningSliders(const QJsonArray &data) {
 void MainWindow::onSaveLiveTuning() {
     // Ensure liveTuningFilePath is set
     if (liveTuningFilePath.isEmpty()) {
-        liveTuningFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuningData.json";
+        liveTuningFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuning/LiveTuningData.json";
     }
 
     // Prepare JSON array to store the settings
@@ -1099,142 +1099,181 @@ void MainWindow::onPushButtonAddLTSettingClicked()
 
 void MainWindow::onPushButtonLoadConfigClicked()
 {
-    // Construct the path to config.ini
     QString mhServerPath = ui->mhServerPathEdit->text();
     if (mhServerPath.isEmpty()) {
         QMessageBox::warning(this, "Error", "Please specify the MH Server path.");
         return;
     }
 
-    QString filePath = QDir(mhServerPath).filePath("MHServerEmu/config.ini");
-    QSettings settings(filePath, QSettings::IniFormat);
+    QString basePath = QDir(mhServerPath).filePath("MHServerEmu/config.ini");
+    QString overridePath = QDir(mhServerPath).filePath("MHServerEmu/ConfigOverride.ini");
 
-    if (!QFile::exists(filePath)) {
-        QMessageBox::warning(this, "Error", QString("Config file not found at: %1").arg(filePath));
+    if (!QFile::exists(basePath)) {
+        QMessageBox::warning(this, "Error", QString("Config file not found at: %1").arg(basePath));
         return;
     }
 
-    // Load Logging settings
-    ui->checkBoxEnableLogging->setChecked(settings.value("Logging/EnableLogging", false).toBool());
-    ui->checkBoxSynchronousMode->setChecked(settings.value("Logging/SynchronousMode", false).toBool());
-    ui->checkBoxHideSensitiveInformation->setChecked(settings.value("Logging/HideSensitiveInformation", false).toBool());
-    ui->checkBoxEnableConsole->setChecked(settings.value("Logging/EnableConsole", false).toBool());
-    ui->checkBoxConsoleIncludeTimestamps->setChecked(settings.value("Logging/ConsoleIncludeTimestamps", false).toBool());
-    ui->comboBoxConsoleMinLevel->setCurrentIndex(settings.value("Logging/ConsoleMinLevel", 0).toInt());
-    ui->comboBoxConsoleMaxLevel->setCurrentIndex(settings.value("Logging/ConsoleMaxLevel", 5).toInt());
-    ui->lineEditConsoleChannels->setText(settings.value("Logging/ConsoleChannels", "").toString());
-    ui->checkBoxEnableFile->setChecked(settings.value("Logging/EnableFile", false).toBool());
-    ui->checkBoxFileIncludeTimestamps->setChecked(settings.value("Logging/FileIncludeTimestamps", false).toBool());
-    ui->comboBoxFileMinLevel->setCurrentIndex(settings.value("Logging/FileMinLevel", 0).toInt());
-    ui->comboBoxFileMaxLevel->setCurrentIndex(settings.value("Logging/FileMaxLevel", 5).toInt());
-    ui->lineEditFileChannels->setText(settings.value("Logging/FileChannels", "").toString());
-    ui->checkBoxFileSplitOutput->setChecked(settings.value("Logging/FileSplitOutput", false).toBool());
+    // Load base config.ini
+    QSettings baseConfig(basePath, QSettings::IniFormat);
 
-    // Load Frontend settings
-    ui->lineEditBindIP->setText(settings.value("Frontend/BindIP", "").toString());
-    ui->lineEditPort->setText(settings.value("Frontend/Port", "").toString());
-    ui->lineEditPublicAddress->setText(settings.value("Frontend/PublicAddress", "").toString());
-    ui->lineEditReceiveTimeoutMS->setText(settings.value("Frontend/ReceiveTimeoutMS", "").toString());
-    ui->lineEditSendTimeoutMS->setText(settings.value("Frontend/SendTimeoutMS", "").toString());
+    QVariantMap mergedConfig;
 
-    // Load Auth settings
-    ui->lineEditAuthAddress->setText(settings.value("Auth/Address", "").toString());
-    ui->lineEditAuthPort->setText(settings.value("Auth/Port", "").toString());
-    ui->checkBoxEnableWebApi->setChecked(settings.value("Auth/EnableWebApi", false).toBool());
+    foreach (const QString &group, baseConfig.childGroups()) {
+        baseConfig.beginGroup(group);
+        foreach (const QString &key, baseConfig.childKeys()) {
+            mergedConfig[group + "/" + key] = baseConfig.value(key);
+        }
+        baseConfig.endGroup();
+    }
 
-    // Load PlayerManager settings
-    ui->checkBoxEnablePersistence->setChecked(settings.value("PlayerManager/EnablePersistence", false).toBool());
-    ui->checkBoxUseJsonDBManager->setChecked(settings.value("PlayerManager/UseJsonDBManager", false).toBool());
-    ui->checkBoxAllowClientVersionMismatch->setChecked(settings.value("PlayerManager/AllowClientVersionMismatch", false).toBool());
-    ui->checkBoxUseWhitelist->setChecked(settings.value("PlayerManager/UseWhitelist", false).toBool());
-    ui->checkBoxShowNewsOnLogin->setChecked(settings.value("PlayerManager/ShowNewsOnLogin", false).toBool());
-    ui->lineEditNewsUrl->setText(settings.value("PlayerManager/NewsUrl", "").toString());
-    ui->lineEditServerCapacity->setText(settings.value("PlayerManager/ServerCapacity", "").toString());
-    ui->lineEditMaxLoginQueueClients->setText(settings.value("PlayerManager/MaxLoginQueueClients", "").toString());
+    // Load ConfigOverride.ini
+    if (QFile::exists(overridePath)) {
+        QSettings overrideConfig(overridePath, QSettings::IniFormat);
 
-    // Load SQLiteDBManager
-    ui->lineEditSQLiteFileName->setText(settings.value("SQLiteDBManager/FileName", "").toString());
-    ui->lineEditSQLiteMaxBackupNumber->setText(settings.value("SQLiteDBManager/MaxBackupNumber", "").toString());
-    ui->lineEditSQLiteBackupIntervalMinutes->setText(settings.value("SQLiteDBManager/BackupIntervalMinutes", "").toString());
+        foreach (const QString &group, overrideConfig.childGroups()) {
+            overrideConfig.beginGroup(group);
+            foreach (const QString &key, overrideConfig.childKeys()) {
+                mergedConfig[group + "/" + key] = overrideConfig.value(key);
+            }
+            overrideConfig.endGroup();
+        }
+    }
 
-    // Load JsonDBManager
-    ui->lineEditJsonFileName->setText(settings.value("JsonDBManager/FileName", "").toString());
-    ui->lineEditJsonMaxBackupNumber->setText(settings.value("JsonDBManager/MaxBackupNumber", "").toString());
-    ui->lineEditJsonBackupIntervalMinutes->setText(settings.value("JsonDBManager/BackupIntervalMinutes", "").toString());
-    ui->lineEditJsonPlayerName->setText(settings.value("JsonDBManager/PlayerName", "").toString());
+    auto getVal = [&](const QString &fullKey, const QVariant &def = QVariant()) -> QVariant {
+        return mergedConfig.contains(fullKey) ? mergedConfig[fullKey] : def;
+    };
 
-    // Load GroupingManager settings
-    ui->lineEditServerName->setText(settings.value("GroupingManager/ServerName", "").toString());
-    ui->textEditMotdText->setPlainText(settings.value("GroupingManager/MotdText", "").toString());
-    ui->comboBoxServerPrestigeLevel->setCurrentIndex(settings.value("GroupingManager/ServerPrestigeLevel", 0).toInt());
+    // --- Logging ---
+    ui->checkBoxEnableLogging->setChecked(getVal("Logging/EnableLogging", false).toBool());
+    ui->checkBoxSynchronousMode->setChecked(getVal("Logging/SynchronousMode", false).toBool());
+    ui->checkBoxHideSensitiveInformation->setChecked(getVal("Logging/HideSensitiveInformation", false).toBool());
+    ui->checkBoxEnableConsole->setChecked(getVal("Logging/EnableConsole", false).toBool());
+    ui->checkBoxConsoleIncludeTimestamps->setChecked(getVal("Logging/ConsoleIncludeTimestamps", false).toBool());
+    ui->comboBoxConsoleMinLevel->setCurrentIndex(getVal("Logging/ConsoleMinLevel", 0).toInt());
+    ui->comboBoxConsoleMaxLevel->setCurrentIndex(getVal("Logging/ConsoleMaxLevel", 5).toInt());
+    ui->lineEditConsoleChannels->setText(getVal("Logging/ConsoleChannels", "").toString());
+    ui->checkBoxEnableFile->setChecked(getVal("Logging/EnableFile", false).toBool());
+    ui->checkBoxFileIncludeTimestamps->setChecked(getVal("Logging/FileIncludeTimestamps", false).toBool());
+    ui->comboBoxFileMinLevel->setCurrentIndex(getVal("Logging/FileMinLevel", 0).toInt());
+    ui->comboBoxFileMaxLevel->setCurrentIndex(getVal("Logging/FileMaxLevel", 5).toInt());
+    ui->lineEditFileChannels->setText(getVal("Logging/FileChannels", "").toString());
+    ui->checkBoxFileSplitOutput->setChecked(getVal("Logging/FileSplitOutput", false).toBool());
 
-    // Load GameInstance settings
-    ui->lineEditNumWorkerThreads->setText(settings.value("GameInstance/NumWorkerThreads", "").toString());
+    // --- Frontend ---
+    ui->lineEditBindIP->setText(getVal("Frontend/BindIP").toString());
+    ui->lineEditPort->setText(getVal("Frontend/Port").toString());
+    ui->lineEditPublicAddress->setText(getVal("Frontend/PublicAddress").toString());
+    ui->lineEditReceiveTimeoutMS->setText(getVal("Frontend/ReceiveTimeoutMS").toString());
+    ui->lineEditSendTimeoutMS->setText(getVal("Frontend/SendTimeoutMS").toString());
 
-    // Load GameData settings
-    ui->checkBoxLoadAllPrototypes->setChecked(settings.value("GameData/LoadAllPrototypes", false).toBool());
-    ui->checkBoxUseEquipmentSlotTableCache->setChecked(settings.value("GameData/UseEquipmentSlotTableCache", false).toBool());
-    ui->checkBoxEnablePatchManager->setChecked(settings.value("GameData/EnablePatchManager", false).toBool());
+    // --- WebFrontend ---
+    ui->lineEditWebFrontendAddress->setText(getVal("WebFrontend/Address").toString());
+    ui->lineEditWebFrontendPort->setText(getVal("WebFrontend/Port").toString());
+    ui->checkBoxEnableLoginRateLimit->setChecked(getVal("WebFrontend/EnableLoginRateLimit", false).toBool());
+    ui->lineEditLoginRateLimitCostMS->setText(getVal("WebFrontend/LoginRateLimitCostMS").toString());
+    ui->lineEditLoginRateLimitBurst->setText(getVal("WebFrontend/LoginRateLimitBurst").toString());
+    ui->checkBoxEnableWebApi->setChecked(getVal("WebFrontend/EnableWebApi", false).toBool());
+    ui->checkBoxEnableDashboard->setChecked(getVal("WebFrontend/EnableDashboard", false).toBool());
+    ui->lineEditDashboardFileDirectory->setText(getVal("WebFrontend/DashboardFileDirectory").toString());
+    ui->lineEditDashboardUrlPath->setText(getVal("WebFrontend/DashboardUrlPath").toString());
 
-    // Load GameOptions settings
-    ui->checkBoxTeamUpSystemEnabled->setChecked(settings.value("GameOptions/TeamUpSystemEnabled", false).toBool());
-    ui->checkBoxAchievementsEnabled->setChecked(settings.value("GameOptions/AchievementsEnabled", false).toBool());
-    ui->checkBoxOmegaMissionsEnabled->setChecked(settings.value("GameOptions/OmegaMissionsEnabled", false).toBool());
-    ui->checkBoxVeteranRewardsEnabled->setChecked(settings.value("GameOptions/VeteranRewardsEnabled", false).toBool());
-    ui->checkBoxMultiSpecRewardsEnabled->setChecked(settings.value("GameOptions/TeamUpSystemEnabled", false).toBool());
-    ui->checkBoxGiftingEnabled->setChecked(settings.value("GameOptions/GiftingEnabled", false).toBool());
-    ui->checkBoxCharacterSelectV2Enabled->setChecked(settings.value("GameOptions/CharacterSelectV2Enabled", false).toBool());
-    ui->checkBoxCommunityNewsV2Enabled->setChecked(settings.value("GameOptions/CommunityNewsV2Enabled", false).toBool());
-    ui->checkBoxLeaderboardsEnabled->setChecked(settings.value("GameOptions/LeaderboardsEnabled", false).toBool());
-    ui->checkBoxNewPlayerExperienceEnabled->setChecked(settings.value("GameOptions/NewPlayerExperienceEnabled", false).toBool());
-    ui->checkBoxMissionTrackerV2Enabled->setChecked(settings.value("GameOptions/MissionTrackerV2Enabled", false).toBool());
-    ui->lineEditGiftingAccountAgeInDaysRequired->setText(settings.value("GameOptions/GiftingAccountAgeInDaysRequired", "").toString());
-    ui->lineEditGiftingAvatarLevelRequired->setText(settings.value("GameOptions/GiftingAvatarLevelRequired", "").toString());
-    ui->lineEditGiftingLoginCountRequired->setText(settings.value("GameOptions/GiftingLoginCountRequired", "").toString());
-    ui->checkBoxInfinitySystemEnabled->setChecked(settings.value("GameOptions/InfinitySystemEnabled", false).toBool());
-    ui->lineEditChatBanVoteAccountAgeInDaysRequired->setText(settings.value("GameOptions/ChatBanVoteAccountAgeInDaysRequired", "").toString());
-    ui->lineEditChatBanVoteAvatarLevelRequired->setText(settings.value("GameOptions/ChatBanVoteAvatarLevelRequired", "").toString());
-    ui->lineEditChatBanVoteLoginCountRequired->setText(settings.value("GameOptions/ChatBanVoteLoginCountRequired", "").toString());
-    ui->checkBoxIsDifficultySliderEnabled->setChecked(settings.value("GameOptions/IsDifficultySliderEnabled", false).toBool());
-    ui->checkBoxOrbisTrophiesEnabled->setChecked(settings.value("GameOptions/OrbisTrophiesEnabled", false).toBool());
+    // --- PlayerManager ---
+    ui->checkBoxEnablePersistence->setChecked(getVal("PlayerManager/EnablePersistence", false).toBool());
+    ui->checkBoxUseJsonDBManager->setChecked(getVal("PlayerManager/UseJsonDBManager", false).toBool());
+    ui->checkBoxAllowClientVersionMismatch->setChecked(getVal("PlayerManager/AllowClientVersionMismatch", false).toBool());
+    ui->checkBoxUseWhitelist->setChecked(getVal("PlayerManager/UseWhitelist", false).toBool());
+    ui->checkBoxShowNewsOnLogin->setChecked(getVal("PlayerManager/ShowNewsOnLogin", false).toBool());
+    ui->lineEditNewsUrl->setText(getVal("PlayerManager/NewsUrl").toString());
+    ui->lineEditServerCapacity->setText(getVal("PlayerManager/ServerCapacity").toString());
+    ui->lineEditMaxLoginQueueClients->setText(getVal("PlayerManager/MaxLoginQueueClients").toString());
 
-    // Load CustomGameOptions settings
-    ui->lineEditESCooldownOverrideMinutes->setText(settings.value("CustomGameOptions/ESCooldownOverrideMinutes", "").toString());
-    ui->checkBoxCombineESStacks->setChecked(settings.value("CustomGameOptions/CombineESStacks", false).toBool());
-    ui->checkBoxAutoUnlockAvatars->setChecked(settings.value("CustomGameOptions/AutoUnlockAvatars", false).toBool());
-    ui->checkBoxAutoUnlockTeamUps->setChecked(settings.value("CustomGameOptions/AutoUnlockTeamUps", false).toBool());
-    ui->checkBoxDisableMovementPowerChargeCost->setChecked(settings.value("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
-    ui->checkBoxAllowSameGroupTalents->setChecked(settings.value("CustomGameOptions/AllowSameGroupTalents", false).toBool());
-    ui->checkBoxDisableInstancedLoot->setChecked(settings.value("CustomGameOptions/DisableInstancedLoot", false).toBool());
-    ui->lineEditLootSpawnGridCellRadius->setText(settings.value("CustomGameOptions/LootSpawnGridCellRadius", "").toString());
-    ui->lineEditTrashedItemExpirationTimeMultiplier->setText(settings.value("CustomGameOptions/TrashedItemExpirationTimeMultiplier", "").toString());
-    ui->checkBoxDisableAccountBinding->setChecked(settings.value("CustomGameOptions/DisableAccountBinding", false).toBool());
-    ui->checkBoxDisableCharacterBinding->setChecked(settings.value("CustomGameOptions/DisableCharacterBinding", false).toBool());
-    ui->checkBoxUsePrestigeLootTable->setChecked(settings.value("CustomGameOptions/UsePrestigeLootTable", false).toBool());
+    // --- SQLiteDBManager ---
+    ui->lineEditSQLiteFileName->setText(getVal("SQLiteDBManager/FileName").toString());
+    ui->lineEditSQLiteMaxBackupNumber->setText(getVal("SQLiteDBManager/MaxBackupNumber").toString());
+    ui->lineEditSQLiteBackupIntervalMinutes->setText(getVal("SQLiteDBManager/BackupIntervalMinutes").toString());
 
-    // Load Billing settings
-    ui->lineEditGazillioniteBalanceForNewAccounts->setText(settings.value("Billing/GazillioniteBalanceForNewAccounts", "").toString());
-    ui->lineEditESToGazillioniteConversionRatio->setText(settings.value("Billing/ESToGazillioniteConversionRatio", "").toString());
-    ui->checkBoxApplyCatalogPatch->setChecked(settings.value("Billing/ApplyCatalogPatch", false).toBool());
-    ui->checkBoxOverrideStoreUrls->setChecked(settings.value("Billing/OverrideStoreUrls", false).toBool());
-    ui->lineEditStoreHomePageUrl->setText(settings.value("Billing/StoreHomePageUrl", "").toString());
-    ui->lineEditStoreHomeBannerPageUrl->setText(settings.value("Billing/StoreHomeBannerPageUrl", "").toString());
-    ui->lineEditStoreHeroesBannerPageUrl->setText(settings.value("Billing/StoreHeroesBannerPageUrl", "").toString());
-    ui->lineEditStoreCostumesBannerPageUrl->setText(settings.value("Billing/StoreCostumesBannerPageUrl", "").toString());
-    ui->lineEditStoreBoostsBannerPageUrl->setText(settings.value("Billing/StoreBoostsBannerPageUrl", "").toString());
-    ui->lineEditStoreChestsBannerPageUrl->setText(settings.value("Billing/StoreChestsBannerPageUrl", "").toString());
-    ui->lineEditStoreSpecialsBannerPageUrl->setText(settings.value("Billing/StoreSpecialsBannerPageUrl", "").toString());
-    ui->lineEditStoreRealMoneyUrl->setText(settings.value("Billing/StoreRealMoneyUrl", "").toString());
+    // --- JsonDBManager ---
+    ui->lineEditJsonFileName->setText(getVal("JsonDBManager/FileName").toString());
+    ui->lineEditJsonMaxBackupNumber->setText(getVal("JsonDBManager/MaxBackupNumber").toString());
+    ui->lineEditJsonBackupIntervalMinutes->setText(getVal("JsonDBManager/BackupIntervalMinutes").toString());
+    ui->lineEditJsonPlayerName->setText(getVal("JsonDBManager/PlayerName").toString());
 
-    // Load Leaderboard settings
-    ui->lineEditDatabaseFile->setText(settings.value("Leaderboards/DatabaseFile", "").toString());
-    ui->lineEditScheduleFile->setText(settings.value("Leaderboards/ScheduleFile", "").toString());
-    ui->lineEditAutoSaveIntervalMinutes->setText(settings.value("Leaderboards/AutoSaveIntervalMinutes", "").toString());
+    // --- GroupingManager ---
+    ui->lineEditServerName->setText(getVal("GroupingManager/ServerName").toString());
+    ui->textEditMotdText->setPlainText(getVal("GroupingManager/MotdText").toString());
+    ui->comboBoxServerPrestigeLevel->setCurrentIndex(getVal("GroupingManager/ServerPrestigeLevel", 0).toInt());
 
-    // Enable all group boxes
+    // --- GameInstance ---
+    ui->lineEditNumWorkerThreads->setText(getVal("GameInstance/NumWorkerThreads").toString());
+
+    // --- GameData ---
+    ui->checkBoxLoadAllPrototypes->setChecked(getVal("GameData/LoadAllPrototypes", false).toBool());
+    ui->checkBoxUseEquipmentSlotTableCache->setChecked(getVal("GameData/UseEquipmentSlotTableCache", false).toBool());
+    ui->checkBoxEnablePatchManager->setChecked(getVal("GameData/EnablePatchManager", false).toBool());
+
+    // --- GameOptions ---
+    ui->checkBoxTeamUpSystemEnabled->setChecked(getVal("GameOptions/TeamUpSystemEnabled", false).toBool());
+    ui->checkBoxAchievementsEnabled->setChecked(getVal("GameOptions/AchievementsEnabled", false).toBool());
+    ui->checkBoxOmegaMissionsEnabled->setChecked(getVal("GameOptions/OmegaMissionsEnabled", false).toBool());
+    ui->checkBoxVeteranRewardsEnabled->setChecked(getVal("GameOptions/VeteranRewardsEnabled", false).toBool());
+    ui->checkBoxMultiSpecRewardsEnabled->setChecked(getVal("GameOptions/TeamUpSystemEnabled", false).toBool());
+    ui->checkBoxGiftingEnabled->setChecked(getVal("GameOptions/GiftingEnabled", false).toBool());
+    ui->checkBoxCharacterSelectV2Enabled->setChecked(getVal("GameOptions/CharacterSelectV2Enabled", false).toBool());
+    ui->checkBoxCommunityNewsV2Enabled->setChecked(getVal("GameOptions/CommunityNewsV2Enabled", false).toBool());
+    ui->checkBoxLeaderboardsEnabled->setChecked(getVal("GameOptions/LeaderboardsEnabled", false).toBool());
+    ui->checkBoxNewPlayerExperienceEnabled->setChecked(getVal("GameOptions/NewPlayerExperienceEnabled", false).toBool());
+    ui->checkBoxMissionTrackerV2Enabled->setChecked(getVal("GameOptions/MissionTrackerV2Enabled", false).toBool());
+    ui->lineEditGiftingAccountAgeInDaysRequired->setText(getVal("GameOptions/GiftingAccountAgeInDaysRequired").toString());
+    ui->lineEditGiftingAvatarLevelRequired->setText(getVal("GameOptions/GiftingAvatarLevelRequired").toString());
+    ui->lineEditGiftingLoginCountRequired->setText(getVal("GameOptions/GiftingLoginCountRequired").toString());
+    ui->checkBoxInfinitySystemEnabled->setChecked(getVal("GameOptions/InfinitySystemEnabled", false).toBool());
+    ui->lineEditChatBanVoteAccountAgeInDaysRequired->setText(getVal("GameOptions/ChatBanVoteAccountAgeInDaysRequired").toString());
+    ui->lineEditChatBanVoteAvatarLevelRequired->setText(getVal("GameOptions/ChatBanVoteAvatarLevelRequired").toString());
+    ui->lineEditChatBanVoteLoginCountRequired->setText(getVal("GameOptions/ChatBanVoteLoginCountRequired").toString());
+    ui->checkBoxIsDifficultySliderEnabled->setChecked(getVal("GameOptions/IsDifficultySliderEnabled", false).toBool());
+    ui->checkBoxOrbisTrophiesEnabled->setChecked(getVal("GameOptions/OrbisTrophiesEnabled", false).toBool());
+
+    // --- CustomGameOptions ---
+    ui->lineEditESCooldownOverrideMinutes->setText(getVal("CustomGameOptions/ESCooldownOverrideMinutes").toString());
+    ui->checkBoxCombineESStacks->setChecked(getVal("CustomGameOptions/CombineESStacks", false).toBool());
+    ui->checkBoxAutoUnlockAvatars->setChecked(getVal("CustomGameOptions/AutoUnlockAvatars", false).toBool());
+    ui->checkBoxAutoUnlockTeamUps->setChecked(getVal("CustomGameOptions/AutoUnlockTeamUps", false).toBool());
+    ui->checkBoxDisableMovementPowerChargeCost->setChecked(getVal("CustomGameOptions/DisableMovementPowerChargeCost", false).toBool());
+    ui->checkBoxAllowSameGroupTalents->setChecked(getVal("CustomGameOptions/AllowSameGroupTalents", false).toBool());
+    ui->checkBoxDisableInstancedLoot->setChecked(getVal("CustomGameOptions/DisableInstancedLoot", false).toBool());
+    ui->lineEditLootSpawnGridCellRadius->setText(getVal("CustomGameOptions/LootSpawnGridCellRadius").toString());
+    ui->lineEditTrashedItemExpirationTimeMultiplier->setText(getVal("CustomGameOptions/TrashedItemExpirationTimeMultiplier").toString());
+    ui->checkBoxDisableAccountBinding->setChecked(getVal("CustomGameOptions/DisableAccountBinding", false).toBool());
+    ui->checkBoxDisableCharacterBinding->setChecked(getVal("CustomGameOptions/DisableCharacterBinding", false).toBool());
+    ui->checkBoxUsePrestigeLootTable->setChecked(getVal("CustomGameOptions/UsePrestigeLootTable", false).toBool());
+
+    // --- MTXStore ---
+    ui->lineEditGazillioniteBalanceForNewAccounts->setText(getVal("MTXStore/GazillioniteBalanceForNewAccounts").toString());
+    ui->lineEditESToGazillioniteConversionRatio->setText(getVal("MTXStore/ESToGazillioniteConversionRatio").toString());
+    ui->lineEditESToGazillioniteConversionStep->setText(getVal("MTXStore/ESToGazillioniteConversionStep").toString());
+    ui->lineEditGiftingOmegaLevelRequired->setText(getVal("MTXStore/GiftingOmegaLevelRequired").toString());
+    ui->lineEditGiftingInfinityLevelRequired->setText(getVal("MTXStore/GiftingInfinityLevelRequired").toString());
+    ui->lineEditHomePageUrl->setText(getVal("MTXStore/HomePageUrl").toString());
+    ui->lineEditHomeBannerPageUrl->setText(getVal("MTXStore/HomeBannerPageUrl").toString());
+    ui->lineEditHeroesBannerPageUrl->setText(getVal("MTXStore/HeroesBannerPageUrl").toString());
+    ui->lineEditCostumesBannerPageUrl->setText(getVal("MTXStore/CostumesBannerPageUrl").toString());
+    ui->lineEditBoostsBannerPageUrl->setText(getVal("MTXStore/BoostsBannerPageUrl").toString());
+    ui->lineEditChestsBannerPageUrl->setText(getVal("MTXStore/ChestsBannerPageUrl").toString());
+    ui->lineEditSpecialsBannerPageUrl->setText(getVal("MTXStore/SpecialsBannerPageUrl").toString());
+    ui->lineEditRealMoneyUrl->setText(getVal("MTXStore/RealMoneyUrl").toString());
+    ui->checkBoxRewriteOriginalBundleUrls->setChecked(getVal("MTXStore/RewriteOriginalBundleUrls", false).toBool());
+    ui->lineEditBundleInfoUrl->setText(getVal("MTXStore/BundleInfoUrl").toString());
+    ui->lineEditBundleImageUrl->setText(getVal("MTXStore/BundleImageUrl").toString());
+
+    // --- Leaderboards ---
+    ui->lineEditDatabaseFile->setText(getVal("Leaderboards/DatabaseFile").toString());
+    ui->lineEditScheduleFile->setText(getVal("Leaderboards/ScheduleFile").toString());
+    ui->lineEditAutoSaveIntervalMinutes->setText(getVal("Leaderboards/AutoSaveIntervalMinutes").toString());
+
+    // --- Enable group boxes ---
     ui->groupBoxLogging->setEnabled(true);
     ui->groupBoxFrontend->setEnabled(true);
-    ui->groupBoxAuth->setEnabled(true);
+    ui->groupBoxWebFrontend->setEnabled(true);
     ui->groupBoxPlayerManager->setEnabled(true);
     ui->groupBoxSQLiteDBManager->setEnabled(true);
     ui->groupBoxJsonDBManager->setEnabled(true);
@@ -1242,26 +1281,15 @@ void MainWindow::onPushButtonLoadConfigClicked()
     ui->groupBoxGameData->setEnabled(true);
     ui->groupBoxGameOptions->setEnabled(true);
     ui->groupBoxCustomGameOptions->setEnabled(true);
-    ui->groupBoxBilling->setEnabled(true);
+    ui->groupBoxMTXStore->setEnabled(true);
 
-    QMessageBox::information(this, "Success", "Config loaded successfully!");
+    QMessageBox::information(this, "Success", "Config + Overrides loaded successfully!");
 }
 
 void MainWindow::onPushButtonSaveConfigClicked() {
-    QString configFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/config.ini";
+    QString configFilePath = ui->mhServerPathEdit->text() + "/MHServerEmu/ConfigOverride.ini";
 
-    // Read the existing config.ini file
-    QFile file(configFilePath);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to open config.ini at %1").arg(configFilePath));
-        return;
-    }
-
-    QTextStream in(&file);
-    QStringList lines = in.readAll().split('\n');
-    file.close();
-
-    // Map settings dynamically from UI
+    // All settings the UI can modify
     QMap<QString, QString> updatedSettings = {
         {"Logging/EnableLogging", ui->checkBoxEnableLogging->isChecked() ? "true" : "false"},
         {"Logging/SynchronousMode", ui->checkBoxSynchronousMode->isChecked() ? "true" : "false"},
@@ -1282,9 +1310,15 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"Frontend/PublicAddress", ui->lineEditPublicAddress->text()},
         {"Frontend/ReceiveTimeoutMS", ui->lineEditReceiveTimeoutMS->text()},
         {"Frontend/SendTimeoutMS", ui->lineEditSendTimeoutMS->text()},
-        {"Auth/Address", ui->lineEditAuthAddress->text()},
-        {"Auth/Port", ui->lineEditAuthPort->text()},
-        {"Auth/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
+        {"WebFrontend/Address", ui->lineEditWebFrontendAddress->text()},
+        {"WebFrontend/Port", ui->lineEditWebFrontendPort->text()},
+        {"WebFrontend/EnableLoginRateLimit", ui->checkBoxEnableLoginRateLimit->isChecked() ? "true" : "false"},
+        {"WebFrontend/LoginRateLimitCostMS", ui->lineEditLoginRateLimitCostMS->text()},
+        {"WebFrontend/LoginRateLimitBurst", ui->lineEditLoginRateLimitBurst->text()},
+        {"WebFrontend/EnableWebApi", ui->checkBoxEnableWebApi->isChecked() ? "true" : "false"},
+        {"WebFrontend/EnableDashboard", ui->checkBoxEnableDashboard->isChecked() ? "true" : "false"},
+        {"WebFrontend/DashboardFileDirectory", ui->lineEditDashboardFileDirectory->text()},
+        {"WebFrontend/DashboardUrlPath", ui->lineEditDashboardUrlPath->text()},
         {"PlayerManager/EnablePersistence", ui->checkBoxEnablePersistence->isChecked() ? "true" : "false"},
         {"PlayerManager/UseJsonDBManager", ui->checkBoxUseJsonDBManager->isChecked() ? "true" : "false"},
         {"PlayerManager/AllowClientVersionMismatch", ui->checkBoxAllowClientVersionMismatch->isChecked() ? "true" : "false"},
@@ -1340,71 +1374,57 @@ void MainWindow::onPushButtonSaveConfigClicked() {
         {"CustomGameOptions/DisableAccountBinding", ui->checkBoxDisableAccountBinding->isChecked() ? "true" : "false"},
         {"CustomGameOptions/DisableCharacterBinding", ui->checkBoxDisableCharacterBinding->isChecked() ? "true" : "false"},
         {"CustomGameOptions/UsePrestigeLootTable", ui->checkBoxUsePrestigeLootTable->isChecked() ? "true" : "false"},
-        {"Billing/GazillioniteBalanceForNewAccounts", ui->lineEditGazillioniteBalanceForNewAccounts->text()},
-        {"Billing/ESToGazillioniteConversionRatio", ui->lineEditESToGazillioniteConversionRatio->text()},
-        {"Billing/ApplyCatalogPatch", ui->checkBoxApplyCatalogPatch->isChecked() ? "true" : "false"},
-        {"Billing/OverrideStoreUrls", ui->checkBoxOverrideStoreUrls->isChecked() ? "true" : "false"},
-        {"Billing/StoreHomePageUrl", ui->lineEditStoreHomePageUrl->text()},
-        {"Billing/StoreHomeBannerPageUrl", ui->lineEditStoreHomeBannerPageUrl->text()},
-        {"Billing/StoreHeroesBannerPageUrl", ui->lineEditStoreHeroesBannerPageUrl->text()},
-        {"Billing/StoreCostumesBannerPageUrl", ui->lineEditStoreCostumesBannerPageUrl->text()},
-        {"Billing/StoreBoostsBannerPageUrl", ui->lineEditStoreBoostsBannerPageUrl->text()},
-        {"Billing/StoreChestsBannerPageUrl", ui->lineEditStoreChestsBannerPageUrl->text()},
-        {"Billing/StoreSpecialsBannerPageUrl", ui->lineEditStoreSpecialsBannerPageUrl->text()},
-        {"Billing/StoreRealMoneyUrl", ui->lineEditStoreRealMoneyUrl->text()},
+        {"MTXStore/GazillioniteBalanceForNewAccounts", ui->lineEditGazillioniteBalanceForNewAccounts->text()},
+        {"MTXStore/ESToGazillioniteConversionRatio", ui->lineEditESToGazillioniteConversionRatio->text()},
+        {"MTXStore/ESToGazillioniteConversionStep", ui->lineEditESToGazillioniteConversionStep->text()},
+        {"MTXStore/GiftingOmegaLevelRequired", ui->lineEditGiftingOmegaLevelRequired->text()},
+        {"MTXStore/GiftingInfinityLevelRequired", ui->lineEditGiftingInfinityLevelRequired->text()},
+        {"MTXStore/StoreHomePageUrl", ui->lineEditHomePageUrl->text()},
+        {"MTXStore/StoreHomeBannerPageUrl", ui->lineEditHomeBannerPageUrl->text()},
+        {"MTXStore/StoreHeroesBannerPageUrl", ui->lineEditHeroesBannerPageUrl->text()},
+        {"MTXStore/StoreCostumesBannerPageUrl", ui->lineEditCostumesBannerPageUrl->text()},
+        {"MTXStore/StoreBoostsBannerPageUrl", ui->lineEditBoostsBannerPageUrl->text()},
+        {"MTXStore/StoreChestsBannerPageUrl", ui->lineEditChestsBannerPageUrl->text()},
+        {"MTXStore/StoreSpecialsBannerPageUrl", ui->lineEditSpecialsBannerPageUrl->text()},
+        {"MTXStore/StoreRealMoneyUrl", ui->lineEditRealMoneyUrl->text()},
+        {"MTXStore/RewriteOriginalBundleUrls", ui->checkBoxRewriteOriginalBundleUrls->isChecked() ? "true" : "false"},
+        {"MTXStore/BundleInfoUrl", ui->lineEditBundleInfoUrl->text()},
+        {"MTXStore/BundleImageUrl", ui->lineEditBundleImageUrl->text()},
         {"Leaderboards/DatabaseFile", ui->lineEditDatabaseFile->text()},
         {"Leaderboards/ScheduleFile", ui->lineEditScheduleFile->text()},
         {"Leaderboards/AutoSaveIntervalMinutes", ui->lineEditAutoSaveIntervalMinutes->text()},
-    };
+        };
 
-    // Modify the settings in the existing lines while keeping comments
-    QString currentSection;
-
-    // ✅ Use indexed access to avoid detachment
-    for (int i = 0; i < lines.size(); ++i) {
-        QString line = lines.at(i).trimmed();
-
-        if (line.isEmpty() || line.startsWith(';')) {
-            continue;
-        }
-
-        // Check if the line defines a section
-        if (line.startsWith('[') && line.endsWith(']')) {
-            currentSection = line.mid(1, line.length() - 2);
-            continue;
-        }
-
-        // Process key-value pairs within a section
-        if (line.contains('=') && !currentSection.isEmpty()) {
-            QString key = currentSection + '/' + line.section('=', 0, 0).trimmed();
-            if (updatedSettings.contains(key)) {
-                qDebug() << "Updating key:" << key
-                         << "Old Value:" << line.section('=', 1).trimmed()
-                         << "New Value:" << updatedSettings[key];
-
-                // ✅ Fix: Use multi-arg `QString::arg` instead of chaining
-                lines[i] = QString("%1=%2").arg(line.section('=', 0, 0).trimmed(), updatedSettings[key]);
-
-                updatedSettings.remove(key);
-            }
-        }
-    }
-
-    // Write back to the config.ini file
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QMessageBox::critical(this, "Error", QString("Failed to save config.ini at %1").arg(configFilePath));
+    // Write ONLY override values to ConfigOverride.ini
+    QFile outFile(configFilePath);
+    if (!outFile.open(QIODevice::WriteOnly | QIODevice::Text)) {
+        QMessageBox::critical(this, "Error", "Failed to write ConfigOverride.ini");
         return;
     }
 
-    QTextStream out(&file);
+    QTextStream out(&outFile);
 
-    // ✅ Use indexed access to prevent detachment
-    for (int i = 0; i < lines.size(); ++i) {
-        out << lines.at(i) << '\n';
+    QString currentSection;
+
+    for (auto it = updatedSettings.begin(); it != updatedSettings.end(); ++it) {
+
+        QString fullKey = it.key();      // e.g. "Logging/EnableLogging"
+        QString value = it.value();
+
+        QString section = fullKey.section('/', 0, 0);      // "Logging"
+        QString key = fullKey.section('/', 1, 1);          // "EnableLogging"
+
+        // If starting a new INI section → write section header
+        if (section != currentSection) {
+            out << "\n[" << section << "]\n";
+            currentSection = section;
+        }
+
+        out << key << "=" << value << "\n";
     }
 
-    file.close();
-    QMessageBox::information(this, "Success", "Configuration saved successfully.");
+    outFile.close();
+    QMessageBox::information(this, "Success", "ConfigOverride.ini saved successfully!");
 }
 
 void MainWindow::onPushButtonUnBanClicked() {
