@@ -1521,7 +1521,7 @@ void MainWindow::onEventSwitchChanged(const QString &eventName, int value) {
     settings.setValue(eventName + "Event", value);
 
     // Define the file paths
-    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuning/";
     QString activeFilePath = serverPath + "LiveTuningData_" + eventName + ".json";
     QString inactiveFilePath = serverPath + "OFF_LiveTuningData_" + eventName + ".json";
 
@@ -1582,7 +1582,7 @@ void MainWindow::onCustomEventSwitchChanged(int eventIndex, int value) {
     }
 
     // Define the server folder
-    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuning/";
     QString activeFilePath = serverPath + eventFileName;
     QString inactiveFilePath = serverPath + "OFF_" + eventFileName;
 
@@ -1881,7 +1881,7 @@ QString MainWindow::getEmailFromDatabase(const QString &username) {
 }
 
 void MainWindow::onPandemoniumProtocolToggle(int value) {
-    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/";
+    QString serverPath = ui->mhServerPathEdit->text() + "/MHServerEmu/Data/Game/LiveTuning/";
     QString activeFilePath = serverPath + "LiveTuningDataz_PandemoniumProtocol.json";
     QString inactiveFilePath = serverPath + "OFF_LiveTuningDataz_PandemoniumProtocol.json";
 
